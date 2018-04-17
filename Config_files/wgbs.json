@@ -1,0 +1,16 @@
+{
+    "input" : "/fast/users/kwreczy_m/projects/WGBS/snakemake/Test/input/pe/",
+    "output": "/fast/users/kwreczy_m/projects/WGBS/snakemake/Test/output/",
+    "genome": "/fast/users/kwreczy_m/projects/WGBS/snakemake/Test/genome/",
+    "tools": "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/",
+    "env" : "./Envs/env.yaml",
+    "args": {
+      "fastqc" : "",
+      "trim_galore"  : "",
+      "bismark"  : "",
+      "methCall"  : "",
+      "multiQC" : "",
+      "bismark_genome_preparation" : "",
+      "sambamba_sort":""
+    }
+}

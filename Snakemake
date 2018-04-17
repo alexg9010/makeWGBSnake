@@ -1,0 +1,236 @@
+# WGBS pipeline
+#
+# Copyright © 2018 Katarzyna Wreczycka katarzyna.wreczycka@mdc-berlin.de
+#
+
+import glob, os, re
+
+inputdir = config["input"]
+outputdir = config["output"]
+genomedir = config["genome"]
+envs = config["env"]
+
+config["samples"] = [re.sub('\\.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*.fq.gz")]
+
+print(config)
+
+
+WORKDIR = os.getcwd() + "/"                         
+
+DIR_scripts   = './Scripts/'
+
+#DIR_diffmeth    = output+'differential_methylation/'
+#DIR_seg         = output+'segmentation/'
+DIR_bigwig      = outputdir+'bigwig_files/'
+DIR_methcall    = outputdir+'methyl_calls/'
+DIR_deduped     = outputdir+'deduplication/'
+DIR_mapped      = outputdir+'bismark/'
+DIR_posttrim_QC = outputdir+'posttrimming_QC/'
+DIR_trimmed     = outputdir+'trimming/'
+DIR_rawqc       = outputdir+'raw_QC/'
+
+
+rule all:
+    input:
+        #expand(DIR_mapped+"{sample}_1_val_1_bismark_bt2_pe.bam",dataset=config["samples"])
+        expand(DIR_rawqc+"{sample}_fastqc.html",sample=config["samples"])
+        
+
+print(config)
+
+# rule methseg:
+#     ## paths inside input and output should be relative
+#     input:
+#         rdsfile     = os.path.join(DIR_methcall,"{prefix}.deduped_methylRaw.RDS")
+#     output:
+#         grfile      = os.path.join(DIR_seg,"{prefix}.deduped_meth_segments_gr.RDS"),
+#         bedfile     = os.path.join(DIR_seg,"{prefix}.deduped_meth_segments.bed")
+#     params:
+#         methCallRDS = os.path.join(WORKDIR,DIR_methcall,"{prefix}.deduped_methylRaw.RDS"),
+#         methSegGR       = os.path.join(WORKDIR,DIR_seg,"{prefix}.deduped_meth_segments_gr.RDS"),
+#         methSegBed      = os.path.join(WORKDIR,DIR_seg,"{prefix}.deduped_meth_segments.bed"),
+#         methSegPng      = os.path.join(WORKDIR,DIR_seg,"{prefix}.deduped_meth_segments.png")
+#     log:
+#         os.path.join(DIR_seg,"{prefix}.deduped_meth_segments.log")
+#     message: fmt("Segmenting methylation profile for {input.rdsfile}.")
+#     shell:
+#         nice('Rscript', ["{DIR_scripts}/methSeg.R",
+#                          "--rds={params.methCallRDS}",
+#                          "--grds={params.methSegGR}",
+#                          "--outBed={params.methSegBed}",
+#                          "--png={params.methSegPng}",
+#                          "--logFile={log}"])
+#                          
+# rule export_bigwig_pe:
+#     input:
+#         seqlengths = os.path.join(DIR_mapped,   "Refgen_"+ASSEMBLY+"_chromlengths.csv"),
+#         rdsfile    = os.path.join(DIR_methcall, "{prefix}_1_val_1_bt2.sorted.deduped_methylRaw.RDS")
+#     output:
+#         bw         = os.path.join(DIR_bigwig,   "{prefix}_pe.bw")
+#     message: fmt("exporting bigwig files from paired-end stream.")
+#     shell:
+#         nice('Rscript', ["{DIR_scripts}/export_bw.R",
+#                          "{input.rdsfile}",
+#                          "{input.seqlengths}",
+#                          ASSEMBLY,
+#                          "{output}"])
+# 
+# rule bam_methCall:
+#     input:
+#         bamfile     = os.path.join(DIR_deduped,"{prefix}.deduped.bam")
+#     output:
+#         rdsfile     = os.path.join(DIR_methcall,"{prefix}.deduped_methylRaw.RDS"),
+#         callFile    = os.path.join(DIR_methcall,"{prefix}.deduped_CpG.txt")
+#     params:
+#         ## absolute path to bamfiles
+#         inBam       = os.path.join(WORKDIR,DIR_deduped,"{prefix}.deduped.bam"),
+#         assembly    = ASSEMBLY,
+#         mincov      = int(config['general']['methylation-calling']['minimum-coverage']),
+#         minqual     = int(config['general']['methylation-calling']['minimum-quality']),
+#         ## absolute path to output folder in working dir
+#         rds         = os.path.join(WORKDIR,DIR_methcall,"{prefix}.deduped_methylRaw.RDS")
+#     log:
+#         os.path.join(DIR_methcall,"{prefix}.deduped_meth_calls.log")
+#     message: fmt("Extract methylation calls from bam file.")
+#     shell:
+#         nice('Rscript', ["{DIR_scripts}/methCall.R",
+#                          "--inBam={params.inBam}",
+#                          "--assembly={params.assembly}",
+#                          "--mincov={params.mincov}",
+#                          "--minqual={params.minqual}",
+#                          "--rds={params.rds}",
+#                          "--logFile={log}"])
+# 
+# rule split_bam_per_chr:
+# 
+# 
+# rule deduplication_pe:
+#     input:
+#         DIR_sorted+"{sample}_1_val_1_bt2.sorted.bam"
+#     output:
+#         DIR_deduped+"{sample}_1_val_1_bt2.sorted.deduped.bam"
+#     log:
+#         DIR_deduped+"{sample}_deduplication.log"
+#     message: fmt("Deduplicating paired-end aligned reads from {input}")
+#     shell:
+#         nice('samtools', [" markdup -r ", "{input}", "{output}"], "{log}")
+# 
+# 
+# rule sortbam_pe:
+#     input:
+#         DIR_mapped+"{sample}_1_val_1_bismark_bt2_pe.bam"
+#     output:
+#         DIR_sorted+"{sample}_1_val_1_bt2.sorted.bam"
+#     message: fmt("Sorting bam file {input}")
+#     shell:
+#         nice('samtools', ["sort -n ", " {input} ", " | ", tool('samtools'), " fixmate -m  - - ", " | ", tool('samtools'), " sort -o {output} " ])
+
+
+#rule bismark_align_unmappedpe_as_se:
+
+
+# rule bismark:
+#     input:
+#         refconvert_CT = GENOMEPATH+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
+# 	refconvert_GA = GENOMEPATH+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
+#         fin1 = DIR_trimmed+"{sample}_1_val_1.fq.gz",
+#         fin2 = DIR_trimmed+"{sample}_2_val_2.fq.gz",
+#         qc   = [ DIR_posttrim_QC+"{sample}_1_val_1_fastqc.html",
+#                  DIR_posttrim_QC+"{sample}_2_val_2_fastqc.html"]
+#     output:
+#         protected(DIR_mapped+"{sample}_1_val_1_bismark_bt2_pe.bam"),
+#         protected(DIR_mapped+"{sample}_1_val_1_bismark_bt2_PE_report.txt")
+#     params:
+#         bismark_args = config['tools']['bismark']['args'],
+#         genomeFolder = "--genome_folder " + GENOMEPATH,
+#         outdir = "--output_dir  "+DIR_mapped,
+#         nucCov = "--nucleotide_coverage",
+#         pathToBowtie = "--path_to_bowtie "+ os.path.dirname(tool('bowtie2')),
+#         useBowtie2  = "--bowtie2 ",
+#         samtools    = "--samtools_path "+ os.path.dirname(tool('samtools')),
+#         tempdir     = "--temp_dir "+DIR_mapped,
+#         cores = "--multicore "+bismark_cores
+#     log:
+#         DIR_mapped+"{sample}_bismark_pe_mapping.log"
+#     message: fmt("Mapping paired-end reads to genome {ASSEMBLY}.")
+#     shell:
+#         config['tools']+"bismark {params} -1 {input.fin1} -2 {input.fin2} {log}"
+# 
+# 
+# rule bismark_genome_preparation:
+#     input:
+#         ancient(GENOMEPATH)
+#     output:
+#         GENOMEPATH+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
+#         GENOMEPATH+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"
+#     params:
+#         bismark_genome_preparation_args = config['args']['bismark_genome_preparation'],
+#         pathToBowtie = "--path_to_bowtie "+ config['tools']+'bowtie2',
+#         useBowtie2 = "--bowtie2 ",
+#         verbose = "--verbose "
+#     log:
+#         'bismark_genome_preparation.log'
+#     message: fmt("Converting {ASSEMBLY} Genome into Bisulfite analogue")
+#     shell:
+#         "bismark_genome_preparation {params} {input} > {log}"
+# 
+# 
+# rule fastqc_after_trimming_pe:
+#     input:
+#         DIR_trimmed+"{sample}_1_val_1.fq.gz",
+#         DIR_trimmed+"{sample}_2_val_2.fq.gz"
+#     output:
+#     	DIR_posttrim_QC+"{sample}_1_val_1_fastqc.html",
+#     	DIR_posttrim_QC+"{sample}_1_val_1_fastqc.zip",
+#     	DIR_posttrim_QC+"{sample}_2_val_2_fastqc.zip",
+#         DIR_posttrim_QC+"{sample}_2_val_2_fastqc.html"
+#     params:
+#         fastqc_args = config['args']['fastqc'],
+#         outdir = "--outdir "+DIR_posttrim_QC, 
+#         err=DIR_posttrim_QCc+"{sample}_fastqc.err"
+#     log:
+#    	    DIR_posttrim_QC+"{sample}_trimmed_fastqc.log"
+#     message:
+#       "Quality checking trimmmed paired-end data from {input}"
+#     shell:
+#         config['tools']+"fastqc {params} {input} > {log}"
+
+# rule trim_reads_pe:
+#     input:
+#         qc    = [ DIR_rawqc+"{sample}_1_fastqc.html",
+#                   DIR_rawqc+"{sample}_2_fastqc.html"],
+#         files = [ PATHIN+"{sample}_1.fq.gz",
+#                   PATHIN+"{sample}_2.fq.gz"]
+#     output:
+#         DIR_trimmed+"{sample}_1_val_1.fq.gz", 
+#         DIR_trimmed+"{sample}_2_val_2.fq.gz",
+#     params:
+#         extra          = config['args']['trim_galore'],
+#         outdir         = "--output_dir "+DIR_trimmed,
+#         phred          = "--phred33",
+#         gz             = "--gzip",
+#         cutadapt       = "--path_to_cutadapt " + config["tools"]+"cutadapt",
+#         paired         = "--paired"
+#     log:
+#         DIR_trimmed+"{sample}.trimgalore.log"
+#     message:
+#         "Trimming raw paired-end read data from {input}"
+#     shell:
+#         'trim_galore {params} {input.files} {log}"
+
+rule fastqc_raw:
+    input:
+        inputdir+"{sample}.fq.gz"
+    output:
+        DIR_rawqc+"{sample}_fastqc.html",
+        DIR_rawqc+"{sample}_fastqc.zip"
+    params:
+        fastqc_args = config['args']['fastqc'],
+        outdir = "--outdir "+ DIR_rawqc
+    log:
+        DIR_rawqc+"{sample}_fastqc.log"
+    message: "Quality checking raw read data from {input}"
+    shell:
+        config["tools"]+"fastqc {params} {input} > {log} 2> {log}.err"
+        
+
