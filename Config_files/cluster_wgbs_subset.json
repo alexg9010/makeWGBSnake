@@ -1,0 +1,18 @@
+{
+    "input" : "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw_merged_random10Mlanespe/",
+    "output": "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakmake/",
+    "genome": "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/",
+    "tools": "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/",
+    "env" : "./Envs/env.yaml",
+    "args": {
+      "fastqc" : "",
+      "trim_galore"  : " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  ",
+      "bismark"  : ' --multicore 6 -N 0 -L  15  --score_min L,0,-0.6 --ambig_bam  --unmapped --ambiguous --maxins 1000  ',
+      "bismark_unmapped" : " --multicore 6 -N 0 -L 15  --score_min L,0,-0.6  ",
+      "methCall"  : "",
+      "multiQC" : "",
+      "bismark_genome_preparation" : "",
+      "sambamba_sort":" --memory-limit=17G --tmpdir=/fast/users/kwreczy_m/projects/makeWGBSnake/Test/output/temp/ -t 1"
+    },
+    "samples" : ["22X3H1","236L96","2P3UF1","5QCV6R","9J2DTT","A45S2Q","AA49P6","BZZHHV","EXP2C8","FTMVW6","GW3LEP","H9H1KG","KJ678J","MTSNQV","W2MXGZ","ZTFVN7"]
+}
