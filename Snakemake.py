@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # WGBS pipeline
 #
 # Copyright © 2018 Katarzyna Wreczycka katarzyna.wreczycka@mdc-berlin.de
@@ -8,40 +10,43 @@ import glob, os, re
 inputdir = config["input"]
 outputdir = config["output"]
 genomedir = config["genome"]
+chromsfile = genomedir+"chroms.txt"
 envs = config["env"]
 tools = config['tools']
 args = config['args']
+ASSEMBLY="hg19"
+MINCOV=10
+MINQUAL=20
 
 try:
     SAMPLES = config["samples"]
 except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
-config['samples'] = SAMPLES
+print(config)
 
-CHROMS = [line.rstrip('\n') for line in open(genomedir+"chroms.txt")]
-ASSEMBLY="hg19"
-MINCOV=10
-MINQUAL=20
+TREATMENT = config['treatment']
+TREATMENT_UNIQUE = set(TREATMENT)
+SAMPLE_TREAT_DICT = dict(zip(SAMPLES, TREATMENT))
 
+CHROMS = [line.rstrip('\n') for line in open(chromsfile)]
 
 
 WORKDIR = os.getcwd() + "/"                         
 DIR_scripts   = './Scripts/'
 
 DIR_plots = outputdir+'plots/'
-DIR_bigwig      = outputdir+'bigwig_files/'
-DIR_methcall    = outputdir+'methyl_calls/'
-DIR_deduped     = outputdir+'deduplication/'
-DIR_mapped      = outputdir+'bismark/'
-DIR_posttrim_QC = outputdir+'posttrimming_QC/'
-DIR_trimmed     = outputdir+'trimming/'
-DIR_rawqc       = outputdir+'raw_QC/'
-DIR_bam_per_chrom = outputdir+'methyl_calls/bam_per_chr/' 
-DIR_seg = outputdir+'segmentation/'
-#DIR_diffmeth    = output+'differential_methylation/'
-DIR_ucsc_hub = outputdir+"ucsc_hub/"
+DIR_bigwig      = outputdir+'07_bigwig_files/'
+DIR_methcall    = outputdir+'06_methyl_calls/'
+DIR_deduped     = outputdir+'05_deduplication/'
+DIR_mapped      = outputdir+'04_mapping/'
+DIR_posttrim_QC = outputdir+'02_posttrimming_QC/'
+DIR_trimmed     = outputdir+'02_trimming/'
+DIR_rawqc       = outputdir+'01_raw_QC/'
+DIR_bam_per_chrom = DIR_mapped+'bam_per_chr/' 
+DIR_seg = outputdir+'08_segmentation/'
+DIR_diffmeth    = outputdir+'differential_methylation/'
+DIR_ucsc_hub = outputdir+"09_ucsc_hub/"
 DIR_multiqc = outputdir+"multiqc/"
-
 
 
 # Construct all the files we're eventually expecting to have.
@@ -49,27 +54,28 @@ FINAL_FILES = []
 
 # FASTQC
 #FINAL_FILES.extend(
-#   expand(DIR_rawqc+"{sample}_{ext}_fastqc.html",sample=config["samples"], ext=["1", "2"])
+#   expand(DIR_rawqc+"{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
 #)
 
 # Alignment
 FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}.bam",sample=config["samples"])
+   expand(DIR_mapped+"{sample}/{sample}.bam",sample=SAMPLES)
 )
 
+# Align unmapped reads as sinle-end
 FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=config["samples"], ext=["1", "2"])
+    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
 )
 
 
 # Sorting
 FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=config["samples"])
+   expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 )
 
 # Merge PE and SE reads
 FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=config["samples"])
+   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
 )
 
 # Multiqc
@@ -80,35 +86,64 @@ FINAL_FILES.extend(
 
 # Deduplicate
 #FINAL_FILES.extend(
-#   expand(DIR_deduped+"{sample}/{sample}_sorted_dedup.bam",sample=config["samples"])
+#   expand(DIR_deduped+"{sample}/{sample}_sorted_dedup.bam",sample=SAMPLES)
 #)
 
 # Split files
 #FINAL_FILES.extend(
-#   expand(DIR_bam_per_chrom+'{sample}/{sample}_sorted_dedup_{chrom}.bam',sample=config["samples"], chrom=['chr1'])
+#   expand(DIR_bam_per_chrom+'{sample}/{sample}_sorted_dedup_{chrom}.bam',sample=SAMPLES, chrom=['chr1'])
 #)
 
 #FINAL_FILES.extend(
-#   expand(DIR_bam_per_chrom+'{sample}/{sample}_sorted_dedup_{chrom}.bam', sample=config["samples"],chrom=CHROMS)
+#   expand(DIR_bam_per_chrom+'{sample}/{sample}_sorted_dedup_{chrom}.bam', sample=SAMPLES,chrom=CHROMS)
 #)
 
 # Methylation calling
 #FINAL_FILES.extend(
-#   expand(DIR_bam_per_chrom+'{sample}/{sample}_sorted_dedup_{chrom}.bam', sample=config["samples"],chrom=CHROMS)
+#   expand(DIR_methcall+'{sample}/{sample}_sorted_dedup_{chrom}_CpG.txt', sample=SAMPLES,chrom=CHROMS)
+#)
+#         rdsfile     = expand(DIR_methcall+"{{sample}}/{{sample}}_sorted_dedup_{chrom}_methylRaw.RDS", chrom=CHROMS),
+#         callFile    = expand(DIR_methcall+"{{sample}}/{{sample}}_sorted_dedup_{chrom}_CpG.txt", chrom=CHROMS)
+ 
+# Merge Methyl. calling
+#FINAL_FILES.extend(
+#   expand(DIR_methcall+'{sample}/{sample}_sorted_dedup_methylRaw.RDS', sample=SAMPLES)
 #)
 
 # Merge methyl. calling files and create a tabix file
 #FINAL_FILES.extend(
-# expand(DIR_methcall+'{sample}/Tabix/{sample}_methyl.txt.bgz', sample=config["samples"])
+# expand(DIR_methcall+'{sample}/Tabix/{sample}_methyl.txt.bgz', sample=SAMPLES)
 #)
 
+# Methylation calling
+FINAL_FILES.extend(
+   expand(DIR_methcall+'{sample}/{sample}_dedup_methylRaw.RDS', sample=SAMPLES)
+)
+
+# Segmentation
+#FINAL_FILES.extend(
+#   expand(DIR_seg+"{sample}/{sample}.deduped_meth_segments.bed", sample=SAMPLES)
+#)
 
 # Create BigWig files
 #FINAL_FILES.extend(
-# expand(DIR_bigwig+'{sample}/{sample}_{chrom}.bw', sample=config["samples"], chrom=CHROMS)
+# expand(DIR_bigwig+'{sample}/{sample}_{chrom}.bw', sample=SAMPLES, chrom=CHROMS)
 #)
 
-print(FINAL_FILES)
+
+# Filter and unite
+#FINAL_FILES.extend(
+#   os.path.join(DIR_methcall,"methylBase_canon.RDS")
+#)
+
+# Differential methylation between subgroups
+# pairwise
+#FINAL_FILES.extend(
+# expand(DIR_diffmeth+'{sample}/diffmeth_{sample}_{tret}.RDS', sample=SAMPLES, tret=TREATMENT_UNIQUE)
+#)
+
+
+#print(FINAL_FILES)
 
 
 rule target:
@@ -126,32 +161,129 @@ rule target:
 #        #genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
 
 
+from snakemake.utils import R
+
+
+rule diffmeth_pairwise:
+     input:
+        rdsfile     = os.path.join(DIR_methcall,"methylBase_canon.RDS")
+     output: 
+         outfile=DIR_diffmeth+'diffmeth_{treat}.RDS'
+     params: 
+         treatment="{treat}"
+     run:
+         R("""
+          
+         input = readRDS("{input.rdsfile}")
+         print(input)
+         
+           """)
+
+
+
+#rule filter_unite_methCalls:
+#     input:
+#        files=[ DIR_methcall+sample+"/"+sample+"_dedup_methylRaw.RDS" for sample in SAMPLES ]
+#     output:
+#        mbd = os.path.join(DIR_methcall,"methylBase_canon.RDS"),
+#        mb = os.path.join(DIR_methcall,"methylBase_canon_destrand.RDS")
+#     params:
+#        sampleids = SAMPLES,
+#        treatments = [SAMPLE_TREAT_DICT[k] for k in SAMPLES]
+#     run:
+#        
+#        R("""
+#          library(methylKit)          
+#          
+#         
+#          methylraw.list = ["{input.files}"]
+#          
+#          print(methylraw.list)i
+#          a=lapply(methylraw.list, readRDS)
+#          print(a)
+#          #print(class(methylraw.list))
+#
+#          #lapply(readRDS("{input}")
+#          
+#          exit()
+#          # Merge samples
+#          filtered.myobj=filterByCoverage(methylrawobj,
+#                                lo.count=10,
+#                                lo.perc=NULL,
+#                                hi.count=NULL,
+#                                hi.perc=99.9)
+#          # Unite
+#          methylBase.obj.destrand=unite(filtered.myobj, 
+#                     destrand=TRUE)
+#          methylBase.obj.destrand=unite(filtered.myobj, 
+#                     destrand=FALSE)
+#
+#          canonical_chromosomes = c(paste0("chr", 1:22), "chrX", "chrY", "chrM")
+#          methylBase.obj.destrand.canon = methylBase.obj.destrand[methylBase.obj.destrand$chr %in% canonical_chromosomes, ]
+#          methylBase.obj.canon = methylBase.obj[methylBase.obj$chr %in% canonical_chromosomes, ]
+#
+#
+#          saveRDS(methylBase.obj.destrand.canon, "{output.mdb}")          
+#          saveRDS(methylBase.obj.canon, "{output.mb}")
+#
+#          """)
+
+
 
 rule meth_segments:
      input:
-         rdsfile     = os.path.join(DIR_methcall,"{prefix}.deduped_methylRaw.RDS") ####### TODO
+         rdsfile     = os.path.join(DIR_methcall,"{prefix}/{prefix}_dedup_methylRaw.RDS") 
      output:
-         grfile      = os.path.join(DIR_seg,"{prefix}.deduped_meth_segments_gr.RDS"),
-         bedfile     = os.path.join(DIR_seg,"{prefix}.deduped_meth_segments.bed")
+         grfile      = os.path.join(DIR_seg,"{prefix}/{prefix}.deduped_meth_segments_gr.RDS"),
+         bedfile     = os.path.join(DIR_seg,"{prefix}/{prefix}.deduped_meth_segments.bed")
      params:
-         methCallRDS = os.path.join(WORKDIR,DIR_methcall,"{prefix}.deduped_methylRaw.RDS"),
-         methSegGR       = os.path.join(WORKDIR,DIR_seg,"{prefix}.deduped_meth_segments_gr.RDS"),
-         methSegBed      = os.path.join(WORKDIR,DIR_seg,"{prefix}.deduped_meth_segments.bed"),
-         methSegPng = os.path.join(WORKDIR,DIR_seg,"{prefix}.deduped_meth_segments.png")
+         methSegPng = DIR_seg+"{prefix}/{prefix}.deduped_meth_segments.png"
      log:
-         os.path.join(DIR_seg,"{sample}/{sample}.deduped_meth_segments.log")
+         os.path.join(DIR_seg,"{prefix}/{prefix}.deduped_meth_segments.log")
      message: "Segmenting methylation profile for {input.rdsfile}."
      shell:
          """
-          Rscript {DIR_scripts}/methSeg.R
-                          --rds={params.methCallRDS}
-                          --grds={params.methSegGR}
-                          --outBed={params.methSegBed}
-                          --png={params.methSegPng}
-                          --logFile={log}
+          {tools}/Rscript {DIR_scripts}/methSeg.R \
+                          {input.rdsfile} \
+                          {output.grfile} \
+                          {output.bedfile} \
+                          {params.methSegPng} \
+                          {log}
           """                
 
 
+rule bam_methCall:
+     input:
+         bamfile     =  DIR_deduped+"{sample}/{sample}_dedup.bam"
+     output:
+         rdsfile     = DIR_methcall+"{sample}/{sample}_dedup_methylRaw.RDS",
+         callFile    = DIR_methcall+"{sample}/{sample}_dedup_CpG.txt"
+     params:
+         assembly    = ASSEMBLY,
+         mincov      = MINCOV,
+         minqual     = MINQUAL,
+         context     = "CpG",
+         #savedb      = False #TODO,
+         savefolder = DIR_methcall+"{sample}/"
+     log:
+         os.path.join(DIR_methcall,"{sample}/{sample}.deduped_meth_calls.log")
+     message: "Extract methylation calls from bam file."
+     shell:
+         """
+         {tools}/Rscript {DIR_scripts}/methCall.R \
+                 --inBam={input.bamfile} \
+                 --assembly={params.assembly} \
+                 --mincov={params.mincov} \
+                 --minqual={params.minqual} \
+                 --rds={output.rdsfile} \
+                 --logFile={log}
+         """
+
+
+
+
+
+############################## PER CHROMOSOME
 rule export_bigwig:
      input:
          seqlengths = os.path.join(DIR_mapped,   "Refgen_"+ASSEMBLY+"_chromlengths.csv"),
@@ -167,7 +299,6 @@ rule export_bigwig:
                           ASSEMBLY \
                           {output} \
           """ 
-
 
 # I dont use it currently
 rule filterSNPs:
@@ -197,9 +328,23 @@ rule makeTabix:
          {tools}/Rscript {DIR_scripts}/makeTabix.R {output} {input}
          """  
 
+def getTreatment(samplename):
+    SAMPLE_TREAT_DICT[samplename]
+
+#rule merge_methCall:
+#     input:
+#        expand(DIR_methcall+"{{sample}}/{{sample}}_sorted_dedup_{chrom}_methylRaw.RDS", chrom=CHROMS)
+#     output:
+#        DIR_methcall+"{sample}/{sample}_sorted_dedup_methylRaw.RDS"
+#     params:
+#        treatment = lambda wildcards: SAMPLE_TREAT_DICT[wildcards.sample],
+#        mincov = MINCOV,
+#     shell:
+#        "{tools}/Rscript {DIR_scripts}/methCall_merge.R {output} {params.treatment} {params.mincov} {input}"
+      
 
 
-rule bam_methCall:
+rule bam_methCall_per_chr:
      input:
          bamfile     = expand(DIR_bam_per_chrom+'{{sample}}/{{sample}}_sorted_dedup_{chrom}.bam', chrom=CHROMS)
      output:
@@ -253,6 +398,7 @@ rule split_bam_per_chr:
           #print(cmd)
           shell(cmd)
 
+##########################################################
 
 
 rule sort_index_dedup:
@@ -416,29 +562,27 @@ rule align_sort_index_unmapped1_se:
 #        ]
 #        for c in cmds:
 #           shell(c)
-
-        
-
+ls 22X3H1/22X3H1_1_val_1_bismark_bt2_pe.bam 22X3H1/22X3H1.bam
 
 rule align_pe:
      input:
          refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
- 	 refconvert_GA = genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
-         fin1 = DIR_trimmed+"{sample}_1_val_1.fq.gz",
-         fin2 = DIR_trimmed+"{sample}_2_val_2.fq.gz",
-         qc   = [ DIR_posttrim_QC+"{sample}_1_val_1_fastqc.html",
-                  DIR_posttrim_QC+"{sample}_2_val_2_fastqc.html"]
+         refconvert_GA = genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
+         fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+         fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
+         qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
+                  DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
      output:
          bam = DIR_mapped+"{sample}/{sample}.bam",
          report = DIR_mapped+"{sample}/{sample}_report.txt",
-	 un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
+         un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
          un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz",
          odir = DIR_mapped+"{sample}/"
      params:
         # Bismark parameters
          bismark_args = config['args']['bismark'],
          genomeFolder = "--genome_folder " + genomedir,
-         outdir = "--output_dir  "+DIR_mapped+"/{sample}",
+         outdir = "--output_dir  "+DIR_mapped+"{sample}/",
          #nucCov = "--nucleotide_coverage",
          pathToBowtie = "--path_to_bowtie " + config['tools'],
          useBowtie2  = "--bowtie2 ",
@@ -481,18 +625,18 @@ rule align_pe:
 
 rule fastqc_after_trimming_pe:
      input:
-         DIR_trimmed+"{sample}_1_val_1.fq.gz",
-         DIR_trimmed+"{sample}_2_val_2.fq.gz"
+         DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+         DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz"
      output:
-     	DIR_posttrim_QC+"{sample}_1_val_1_fastqc.html",
-     	DIR_posttrim_QC+"{sample}_1_val_1_fastqc.zip",
-     	DIR_posttrim_QC+"{sample}_2_val_2_fastqc.zip",
-         DIR_posttrim_QC+"{sample}_2_val_2_fastqc.html"
+     	DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
+     	DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.zip",
+     	DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.zip",
+         DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"
      params:
          fastqc_args = config['args']['fastqc'],
-         outdir = "--outdir "+DIR_posttrim_QC
+         outdir = "--outdir "+DIR_posttrim_QC + "{sample}/"
      log:
-    	    DIR_posttrim_QC+"{sample}_trimmed_fastqc.log"
+    	    DIR_posttrim_QC+"{sample}/{sample}_trimmed_fastqc.log"
      message:
        "Quality checking trimmmed paired-end data from {input}"
      shell:
@@ -505,17 +649,17 @@ rule trim_reads_pe:
          files = [ inputdir+"{sample}_1.fq.gz",
                    inputdir+"{sample}_2.fq.gz"]
      output:
-         DIR_trimmed+"{sample}_1_val_1.fq.gz", 
-         DIR_trimmed+"{sample}_2_val_2.fq.gz",
+         DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz", 
+         DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
      params:
          extra          = config['args']['trim_galore'],
-         outdir         = "--output_dir "+DIR_trimmed,
+         outdir         = "--output_dir "+DIR_trimmed+"{sample}/",
          phred          = "--phred33",
          gz             = "--gzip",
          cutadapt       = "--path_to_cutadapt " + tools +"cutadapt",
          paired         = "--paired"
      log:
-         DIR_trimmed+"{sample}.trimgalore.log"
+         DIR_trimmed+"{sample}/{sample}.trimgalore.log"
      message:
          "Trimming raw paired-end read data from {input}"
      shell:
@@ -526,13 +670,13 @@ rule fastqc_raw:
     input:
        inputdir+"{sample}.fq.gz"
     output:
-        DIR_rawqc+"{sample}_fastqc.html",
-        DIR_rawqc+"{sample}_fastqc.zip"
+        DIR_rawqc+"{sample}/{sample}_fastqc.html",
+        DIR_rawqc+"{sample}/{sample}_fastqc.zip"
     params:
        fastqc_args = config['args']['fastqc'],
        outdir = "--outdir "+ DIR_rawqc
     log:
-        DIR_rawqc+"{sample}_fastqc.log"
+        DIR_rawqc+"{sample}/{sample}_fastqc.log"
     shell:
         config["tools"]+"fastqc {params} {input} > {log} 2> {log}.err"
         

@@ -14,8 +14,6 @@
       "bismark_genome_preparation" : "",
       "sambamba_sort":""
     },
-    "samples" : [ '22X3H1', '236L96', '2P3UF1', '5QCV6R', '9J2DTT', 'A45S2Q', 'AA49P6', 'BZZHHV', 'EXP2C8', 'FTMVW6','GW3LEP', 'H9H1KG', 'KJ678J', 'L1PP31', 'L3RXU9', 'LJ8KVQ','MCCDLU', 'MTSNQV', 'QMQHSB', 'W2MXGZ','WYKWK3', 'YYGAV6', 'Z75FFC', 'ZTFVN7'],
-    "treatment" : ['3', '5', '4', '3', '5', '2', '4', '1', '4', '1', '1', '4', '2', '5', '5', '4', '1', '2', '5', '3', '1', '2', '3', '2'],
-    "treatment2" : [ 'IMR',     'MNA',     'HR_nMNA', 'IMR',     'MNA',     'LR',      'HR_nMNA', 'ST4S',    'HR_nMNA', 'ST4S',    'ST4S',    'HR_nMNA', 'LR',      'MNA',     'MNA',     'HR_nMNA', 'ST4S',    'LR', 'MNA',     'IMR',     'ST4S',    'LR',      'IMR',     'LR']
+    "treatment" : ['3'],
 
 }

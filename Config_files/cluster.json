@@ -2,12 +2,12 @@
     "__default__" :
     {
         "account" : "kwreczy_m",
-        "time" : "00:15:00",
-        "n" : 1,
-        "partition" : "core"
+        "time" : "168:00:00",
+        "pe": 'smp 7'
+        "h_vmem": '17g'
     },
-    "compute1" :
+    "align_pe" :
     {
-        "time" : "00:20:00"
+        "time" : "168:00:00"
     }
 }

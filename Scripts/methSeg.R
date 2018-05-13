@@ -20,44 +20,6 @@
 ## Collect arguments
 args <- commandArgs(TRUE)
 
-## Default setting when no arguments passed
-if(length(args) < 1) {
-  args <- c("--help")
-}
-
-## Help section
-if("--help" %in% args) {
-  cat("
-      Render to report
-
-      Arguments:
-      --rds name of the input RDS file containting the methylRaw object
-      --grds name of output RDS file containing Segments as GRanges object
-      --outBed name of output BED file containing Segments
-      --png name of file to save diagnostic plots to   
-      --logFile file to print the logs to
-      --help              - print this text
-      
-      Example:
-      ./test.R --arg1=1 --arg2='output.txt' --arg3=TRUE \n\n")
-  
-  q(save="no")
-}
-
-## Parse arguments (we expect the form --arg=value)
-parseArgs <- function(x) strsplit(sub("^--", "", x), "=")
-
-argsDF <- as.data.frame(do.call("rbind", parseArgs(args)))
-argsL <- as.list(as.character(argsDF$V2))
-names(argsL) <- argsDF$V1
-
-
-## catch output and messages into log file
-out <- file(argsL$logFile, open = "wt")
-sink(out,type = "output")
-sink(out, type = "message")
-
-
 
 # Run Functions -----------------------------------------------------------
 
@@ -66,10 +28,12 @@ sink(out, type = "message")
 ## load methylKit
 library("methylKit")
 
-input     <- argsL$rds
-output    <- argsL$outBed
-grFile    <- argsL$grds
-pngFile   <- argsL$png
+input     <- args[1]#argsL$rds
+output    <- args[3]#argsL$outBed
+grFile    <- args[2]#argsL$grds
+pngFile   <- args[4]#argsL$png
+
+print(args)
 
 ## read input methylRaw
 methRaw <- readRDS(input)
