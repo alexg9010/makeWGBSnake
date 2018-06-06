@@ -2,8 +2,11 @@
     "input" : "/fast/users/kwreczy_m/projects/makeWGBSnake/Test/input/pe/",
     "output": "/fast/users/kwreczy_m/projects/makeWGBSnake/Test/output/",
     "genome": "/fast/users/kwreczy_m/projects/makeWGBSnake/Test/genome/",
+    "chromsfile" : "/fast/users/kwreczy_m/projects/makeWGBSnake/Test/genome/chroms.txt",
+    "chromcanonicalfile" : "/fast/users/kwreczy_m/projects/makeWGBSnake/Test/genome/chroms.txt",
     "tools": "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/",
     "env" : "./Envs/env.yaml",
+    "samples" : [ 'PE', 'PE'],
     "args": {
       "fastqc" : "",
       "trim_galore"  : " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  ",
@@ -12,8 +15,9 @@
       "methCall"  : "",
       "multiQC" : "",
       "bismark_genome_preparation" : "",
-      "sambamba_sort":""
+      "sambamba_sort":"",
+      "picard_MarkDuplicates_args":""
     },
-    "treatment" : ['3'],
+    "treatment" : ['0','1']
 
 }

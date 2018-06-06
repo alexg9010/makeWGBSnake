@@ -1,6 +1,7 @@
 # PiGx BSseq Pipeline.
 #
-# Copyright © 2018 Alexander Gosdschan <alexander.gosdschan@mdc-berlin.de>
+# Copyright © 2018 Alexander Gosdschan <alexander.gosdschan@mdc-berlin.de>,
+# Katarzyna Wreczycka katarzyna.wreczycka@mdc-berlin.de
 #
 # This file is part of the PiGx BSseq Pipeline.
 #
@@ -55,9 +56,9 @@ names(argsL) <- argsDF$V1
 
 
 ## catch output and messages into log file
-out <- file(argsL$logFile, open = "wt")
-sink(out,type = "output")
-sink(out, type = "message")
+# out <- file(argsL$logFile, open = "wt")
+# sink(out,type = "output")
+# sink(out, type = "message")
 
 
 
@@ -69,29 +70,29 @@ sink(out, type = "message")
 ## load methylKit
 library("methylKit")
 
-
 input     <- argsL$inBam
+#sample_id  <- argsL$sample_id
 assembly  <- argsL$assembly
 mincov    <- as.numeric(argsL$mincov)
 minqual   <- as.numeric(argsL$minqual)
-rdsfile   <- argsL$rds
+save_folder <- argsL$save_folder
+save_db <- argsL$save_db
+
+sample_id = strsplit(basename(input), "[.]")[[1]][1]
+
 
 ### Extract Methylation Calls
 
-## extract the sample id from sample file 
-sample_id <- gsub(".bam","",basename(input))
-
-## define the location to save intermediate file
-save_folder <- dirname(rdsfile)
-
 ## read bam file into methylKit object
-methRaw = processBismarkAln(location = input,
+methRawDB = processBismarkAln(location = input,
                             sample.id = sample_id,
                             assembly = assembly,
                             mincov = mincov,
                             minqual = minqual,
                             save.context = "CpG",
-                            save.folder = save_folder)
+                            save.folder = save_folder,
+                            save.db = TRUE
+)
 
-## Saving object
-saveRDS(methRaw,file=normalizePath(rdsfile)) 
+
+

@@ -1,13 +1,7 @@
 {
+
     "__default__" :
     {
-        "account" : "kwreczy_m",
-        "time" : "168:00:00",
-        "pe": 'smp 7'
-        "h_vmem": '17g'
-    },
-    "align_pe" :
-    {
-        "time" : "168:00:00"
+    "name"      : "{rule}.{wildcards}"
     }
 }

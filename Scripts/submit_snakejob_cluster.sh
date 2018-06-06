@@ -19,7 +19,7 @@ snakemake \
     --drmaa " \
         -V \
         -cwd \
-        -P highmem \
+        -P medium \
         -l h_vmem=17g \
         -l h_rt=168:00:00 \ 
         -pe 7 \
@@ -28,10 +28,10 @@ snakemake \
     -j 24 \
     -k \
     -p \
-    -s /fast/users/kwreczy_m/projects/makeWGBSnake/Snakemake.py \
-    --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_subset.json
-
-
+    -s /fast/users/kwreczy_m/projects/makeWGBSnake/Snakemake_postprocessing.py \
+    --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.json
+#    --forceall
+#    --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_subset.json
 #    --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.json 
 #    --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_subset.json
 #    --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/wgbs.json

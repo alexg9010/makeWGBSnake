@@ -1,3 +1,23 @@
+# PiGx BSseq Pipeline.
+#
+# Copyright © 2017, 2018 Bren Osberg <Brendan.Osberg@mdc-berlin.de>
+# Copyright © 2017 Alexander Gosdschan <alexander.gosdschan@mdc-berlin.de>
+# Copyright © 2017, 2018 Katarzyna Wreczycka <katwre@gmail.com>
+# Copyright © 2017, 2018 Ricardo Wurmus <ricardo.wurmus@mdc-berlin.de>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 suppressPackageStartupMessages(expr = {
   library(GenomicRanges)
@@ -8,16 +28,20 @@ suppressPackageStartupMessages(expr = {
 
 args <- commandArgs(trailingOnly = TRUE)
 
-RDS_filepath    <- args[1]
+tabix_filepath    <- args[1]
 seqlengths_path <- args[2]
 assembly        <- args[3]
-out_path        <- args[4]
+sampleid        <- args[4]
+out_path        <- args[5]
 
+m1 = methRead(tabix_filepath,   #import the methylRaw object from tabix file.
+             sampleid, 
+             assembly, 
+             dbtype='tabix')
 
-m1          = readRDS(file = RDS_filepath ) # import the methylRaw object from file.
-seqdat_temp = read.csv(seqlengths_path, sep="\t", header=FALSE)
-Sinfo <- Seqinfo(seqnames   = as.character(seqdat_temp[,1]),
-                 seqlengths = seqdat_temp[,2],
+seqdat_temp = read.table(seqlengths_path, sep="\t", header=FALSE, col.names=c("chr", "len"), stringsAsFactors = FALSE)
+Sinfo <- Seqinfo(seqnames   = seqdat_temp$chr,
+                 seqlengths = seqdat_temp$len,
                  genome     = assembly)
 
 

@@ -28,18 +28,29 @@ args <- commandArgs(TRUE)
 ## load methylKit
 library("methylKit")
 
-input     <- args[1]#argsL$rds
+input     <- args[1]#DIR_methcall+"{sample}/{sample}_filtered.txt.bgz"
 output    <- args[3]#argsL$outBed
 grFile    <- args[2]#argsL$grds
 pngFile   <- args[4]#argsL$png
+assembly <- args[5]#argsL$png
+sampleid <- args[6]#argsL$png
+logfile<- args[7]#argsL$png
+
+## catch output and messages into log file
+out <- file(logfile, open = "wt")
+sink(out,type = "output")
+sink(out, type = "message")
 
 print(args)
 
 ## read input methylRaw
-methRaw <- readRDS(input)
+methRawDB = methRead(input,
+                     sampleid , 
+                     assembly, 
+                     dbtype='tabix')
 
 ## convert to GRanges
-methRaw.gr= as(methRaw,"GRanges")
+methRaw.gr= as(methRawDB,"GRanges")
 ## calculate methylation score 
 mcols(methRaw.gr)$meth=100*methRaw.gr$numCs/methRaw.gr$coverage
 ##destrand
@@ -47,12 +58,24 @@ strand(methRaw.gr) <- "*"
 ##sort 
 methRaw.gr <- sort(methRaw.gr[,"meth"]) 
 
-
 ### Segmentation of methylation profile
 
+# Remove chromosomes that contain <= 2 ranges
+# It's a requirement for methSeg(). 
+methRaw.gr.per.chr = split(methRaw.gr , seqnames(methRaw.gr))
+methRaw.gr.per.chr.len = sapply(methRaw.gr.per.chr, length)
+methRaw.gr.per.chr.len.2.remove = names(methRaw.gr.per.chr.len[methRaw.gr.per.chr.len<=5])
+
+if( length(methRaw.gr.per.chr.len.2.remove)>=1 ){
+  methRaw.gr <- dropSeqlevels(methRaw.gr, 
+                              methRaw.gr.per.chr.len.2.remove, 
+                              pruning.mode="coarse")
+}
+
 png(filename = pngFile,units = "in",width = 8,height = 4.5,res=300)
-res.gr = methSeg(methRaw.gr,diagnostic.plot=TRUE)
+res.gr = methSeg(methRaw.gr, diagnostic.plot=TRUE)
 dev.off()
+
 
 ## Saving object
 saveRDS(res.gr,file=grFile) 
@@ -64,9 +87,9 @@ saveRDS(res.gr,file=grFile)
 methSeg2bed(segments = res.gr,
             trackLine = paste0("track name='meth segments ' ",
                                "description='meth segments of ",
-                               methRaw@sample.id,
+                               methRawDB@sample.id,
                                " mapped to ",
-                               methRaw@assembly,
+                               methRawDB@assembly,
                                "' itemRgb=On"),
             colramp=colorRamp(c("gray","green", "darkgreen")),
             filename = output)

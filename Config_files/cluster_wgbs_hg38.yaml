@@ -1,0 +1,103 @@
+---
+input: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw_merged_lanes/"
+output: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38/"
+genome: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/"
+tools: "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/"
+env: "./Envs/env.yaml"
+chromsfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.sizes"
+chromcanonicalfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.canon.sizes"
+args:
+  fastqc: ''
+  trim_galore: " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  "
+  bismark: " --multicore 6 -N 0 -L  15  --score_min L,0,-0.6 --ambig_bam  --unmapped --ambiguous --maxins 1000  "
+  bismark_unmapped: " --multicore 6 -N 0 -L 15  --score_min L,0,-0.6  "
+  methCall: ''
+  multiQC: ''
+  bismark_genome_preparation: ''
+  sambamba_sort: " --memory-limit=30G --tmpdir=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38/temp/ -t 1"
+  picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=35000 "
+samples:
+- '22X3H1'
+- '236L96'
+- '2P3UF1'
+- '5QCV6R'
+- '9J2DTT'
+- 'A45S2Q'
+- 'AA49P6'
+- 'BZZHHV'
+- 'EXP2C8'
+- 'FTMVW6'
+- 'GW3LEP'
+- 'H9H1KG'
+- 'KJ678J'
+- 'L1PP31'
+- 'L3RXU9'
+- 'LJ8KVQ'
+- 'MCCDLU'
+- 'MTSNQV'
+- 'QMQHSB'
+- 'W2MXGZ'
+- 'WYKWK3'
+- 'YYGAV6'
+- 'Z75FFC'
+- 'ZTFVN7'
+treatment:
+- '3'
+- '5'
+- '4'
+- '3'
+- '5'
+- '2'
+- '4'
+- '1'
+- '4'
+- '1'
+- '1'
+- '4'
+- '2'
+- '5'
+- '5'
+- '4'
+- '1'
+- '2'
+- '5'
+- '3'
+- '1'
+- '2'
+- '3'
+- '2'
+treatment2:
+- 'IMR'
+- 'MNA'
+- 'HR_nMNA'
+- 'IMR'
+- 'MNA'
+- 'LR'
+- 'HR_nMNA'
+- 'ST4S'
+- 'HR_nMNA'
+- 'ST4S'
+- 'ST4S'
+- 'HR_nMNA'
+- 'LR'
+- 'MNA'
+- 'MNA'
+- 'HR_nMNA'
+- 'ST4S'
+- 'LR'
+- 'MNA'
+- 'IMR'
+- 'ST4S'
+- 'LR'
+- 'IMR'
+- 'LR'
+
+
+# Here is info how I ran it:
+#  snakemake -s ./Snakemake_postprocessing.py -j 24  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds  --latency-wait 20000  --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
+
+
+
+
+
+
