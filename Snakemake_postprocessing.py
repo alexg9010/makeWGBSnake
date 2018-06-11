@@ -35,10 +35,9 @@ CHROMS = [line.rstrip('\n').split("\t")[0] for line in open(chromsfile)]
 CHROMS_LENGTH = [line.rstrip('\n').split("\t")[1] for line in open(chromsfile)]
 CHROMS_CANON = [line.rstrip('\n').split("\t")[0] for line in open(chromcanonicalfile)]
 
-ASSEMBLY="hg19"
-MINCOV=10 
-MINQUAL=20  
-NPARTS=5
+ASSEMBLY=config["assembly"]
+MINCOV=ARGS["MINCOV"]
+MINQUAL=ARGS["MINQUAL"]
 
 
 # ==========================================================================================
@@ -51,7 +50,7 @@ DIR_plots = outputdir+'plots/'
 DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
-DIR_deduped     = outputdir+'05_deduplication/'
+DIR_deduped_picard     = outputdir+'05_deduplication/'
 DIR_mapped      = outputdir+'04_mapping/'
 DIR_posttrim_QC = outputdir+'02_posttrimming_QC/'
 DIR_trimmed     = outputdir+'02_trimming/'
@@ -71,73 +70,80 @@ DIR_multiqc = outputdir+"multiqc/"
 # Construct all the files we're eventually expecting to have.
 FINAL_FILES = []
 
-# Alignment
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}.bam",sample=SAMPLES)
-)
-# 
-# # # Sorting
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
-# )
 
-
-#Align unmapped reads as sinle-end
+# # FASTQC
 # FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+#   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
 # )
 # 
-# #Sorting
+# # Alignment
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 # )
 # 
-# #Merge PE and SE reads
+# # Split files per chromosome
 # FINAL_FILES.extend(
-#   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
-# )
-
-
-# Deduplicate
-FINAL_FILES.extend(
-  expand(DIR_deduped+"{sample}/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
-)
-
-# Methylation calling
-FINAL_FILES.extend(
-   #expand(DIR_methcall+'{sample}/{sample}_cpg.txt.bgz', sample=SAMPLES)
-   expand(DIR_methcall+"{sample}/{sample}_{chrom}_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
-)
-
-# # Filter meth.
-FINAL_FILES.extend(
-   expand(DIR_methcall+'{sample}/{sample}_{chrom}_cpg_filtered.txt.bgz', sample=SAMPLES, chrom=CHROMS_CANON)
-)
- 
-# # Unite meth calls
-FINAL_FILES.extend(
-   expand(DIR_methcall+'methylBaseDB.obj_filtered_destrandF.{chrom}.RDS', chrom=CHROMS_CANON)
-)
-# 
-# # # Segmentation
-# FINAL_FILES.extend(
-#   expand(DIR_seg+"{sample}/{sample}.deduped_meth_segments.bed", sample=SAMPLES)
+#    expand(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam", sample=SAMPLES, chrom=CHROMS_CANON)
 # )
 # 
-# Differential methylation between subgroups, pairwise
-# FINAL_FILES.extend(
-#     expand(DIR_diffmeth+'diffmeth_{tret}.RDS', sample=SAMPLES, tret=TREATMENT_UNIQUE)
-# )
-
-# BigWig files
+# Sorting
 FINAL_FILES.extend(
-    expand(DIR_bigwig+"{sample}/{sample}_{chrom}.bw", sample=SAMPLES, chrom=CHROMS_CANON)
+   expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 )
 
 
-#snakemake -s /fast/users/kwreczy_m/projects/makeWGBSnake/Snakemake_postprocessing.py -j 24  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/test.json --printshellcmds  --forceall
+# Align unmapped reads as sinle-end
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+)
 
-print(FINAL_FILES)
+# Merge PE and SE reads
+FINAL_FILES.extend(
+  expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+)
+
+# Sort merged PE and SE reads
+FINAL_FILES.extend(
+  expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
+)
+
+# # Deduplicate
+# FINAL_FILES.extend(
+#   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+# 
+# # Methylation call. files
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+# 
+# # Merge methylation calling
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz",sample=SAMPLES)
+# )
+# 
+# # Segmentation
+# ##FINAL_FILES.extend(
+# ##  expand(DIR_seg+"{sample}/{sample}.deduped_meth_segments.bed", sample=SAMPLES)
+# ##)
+# FINAL_FILES.extend(
+#   expand(DIR_seg+"{sample}/per_chrom/{sample}_{chrom}.deduped_meth_segments.bed", sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+# 
+# # Differential methylation between subgroups, pairwise
+# FINAL_FILES.extend(
+#     expand(DIR_diffmeth+'diffmeth_{treat}.RDS', treat=TREATMENT_UNIQUE)
+# )
+# 
+# # BigWig files
+# FINAL_FILES.extend(
+#     expand(DIR_bigwig+"{sample}/{sample}.bw", sample=SAMPLES)
+# )
+# ## # BigWig files
+# ## FINAL_FILES.extend(
+# ##     expand(DIR_bigwig+"{sample}/per_chrom/{sample}_{chrom}.bw", sample=SAMPLES, chrom=CHROMS_CANON)
+# ## )
+
 rule target:
   input: FINAL_FILES
 
@@ -149,32 +155,33 @@ rule target:
 # ==========================================================================================
 # Segmentation:
 
-# 
-# rule meth_segments:
-#      input:
-#          inputfile     = DIR_methcall+"{sample}/{sample}_filtered.txt.bgz"
-#      output:
-#          grfile      = os.path.join(DIR_seg,"{sample}/{sample}.deduped_meth_segments_gr.RDS"),
-#          bedfile     = os.path.join(DIR_seg,"{sample}/{sample}.deduped_meth_segments.bed")
-#      params:
-#          methSegPng = DIR_seg+"{sample}/{sample}.deduped_meth_segments.png",
-#          assembly = ASSEMBLY,
-#          sampleid = "{sample}"
-#      log:
-#          os.path.join(DIR_seg,"{sample}/{sample}.deduped_meth_segments.log")
-#      message: "Segmenting methylation profile for {input.inputfile}."
-#      shell:
-#          """
-#           {tools}/Rscript {DIR_scripts}/methSeg.R \
-#                           {input.inputfile} \
-#                           {output.grfile} \
-#                           {output.bedfile} \
-#                           {params.methSegPng} \
-#                           {params.assembly} \
-#                           {params.sampleid} \
-#                           {log}
-#           """
+include: "./Rules/Segmentation_rules.py"
 
+# ==========================================================================================
+# Differential methylation in a pairwise manner
+
+rule diffmeth_pairwise:
+     input:
+         destrandTfile = DIR_methcall+"methylBase_per_chrom/methylBase_cpg_dF.txt.bgz"
+     output:
+         outfile=DIR_diffmeth+'diffmeth_{treat}.RDS'
+     params:
+         treat="{treat}",
+         cores = 4, # with more than 5 usually there is not enough memory
+         treatments = TREATMENT,
+         sampleids = SAMPLES,
+         context = "CpG",
+         assembly=ASSEMBLY,
+         outputdir = DIR_diffmeth,
+         suffix = "diffmeth_{treat}",
+         save_db = True
+     shell:
+         """{tools}/Rscript {DIR_scripts}/MethDiff.R \
+         {input} {output} \
+         {params.treat} {params.cores} "{params.treatments}" "{params.sampleids}" \
+         {params.context} {params.assembly} \
+         {params.outputdir} {params.suffix} {params.save_db}"""
+        
 
 # ==========================================================================================
 # Export a bigwig file:
@@ -182,11 +189,11 @@ rule target:
 rule export_bigwig:
     input:
         seqlengths = chromcanonicalfile,
-        tabixfile    = expand(DIR_methcall+"{{sample}}/{{sample}}_{chrom}_cpg_filtered.txt.bgz", chrom=CHROMS_CANON)
+        tabixfile    = DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz"
     params:
         sampleid = "{sample}"
     output:
-        bw         = expand(DIR_bigwig+"{{sample}}/{{sample}}_{chrom}.bw", chrom=CHROMS_CANON),
+        bw         = DIR_bigwig+"{sample}/{sample}.bw",
     message: "Exporting bigwig files."
     shell:
        """
@@ -197,228 +204,137 @@ rule export_bigwig:
                  {params.sampleid} \
                  {output}
        """
-                         
+       
 # ==========================================================================================
-# Differential methylation in a pairwise manner
-
-# rule diffmeth_pairwise:
-#      input:
-#          destrandTfile = DIR_methcall+"methylBaseDB.obj_filtered_destrandT.RDS"
-#      output:
-#          outfile=DIR_diffmeth+'diffmeth_{treat}.RDS'
-#      params:
-#          treatment="{treat}",
-#          cors = 20
-#      run:
-#          R("""
-#          library(methylKit)
-#     
-#          input = "{input.destrandTfile}"
-#          output = "{output.outfile}"
-#          t = as.numeric( "{params.treatment}" )
-#          
-#          
-#          my.methylBase.obj = readRDS(input)
-#          
-#          # change treatment vector
-#          my.methylBase.obj@treatment  = ifelse(my.methylBase.obj@treatment==t,  1, 0)
-#          
-#          myDiff<-calculateDiffMeth(my.methylBase.obj,
-#                                   overdispersion="MN",
-#                                   test="Chisq",
-#                                   mc.cores=24)
-#                                   
-#          saveRDS(myDiff, output)    
-#                  
-#            """)
+# Methylation calling:
 # 
-# 
+include: "./Rules/Meth_preprocessing_rules.py"
 
-rule unite_meth_calls:
+
+# ==========================================================================================
+# Deduplication:
+
+rule sort_index_dedup_perchr:
      input:
-         [ expand(DIR_methcall+sample+"/"+sample+"_{chrom}_cpg_filtered.txt.bgz", chrom=CHROMS_CANON) for sample in SAMPLES]
+         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.bam"
      output:
-         destrandTfile = expand(DIR_methcall+"methylBaseDB.obj_filtered_destrandT.{chrom}.RDS", chrom=CHROMS_CANON),
-         destrandFfile = expand(DIR_methcall+"methylBaseDB.obj_filtered_destrandF.{chrom}.RDS", chrom=CHROMS_CANON)
-     params:
-         inputdir = DIR_methcall,
-         samples = SAMPLES,
-         treatments = TREATMENT,
-         assembly=ASSEMBLY,
-         cores=24
-     log: expand(DIR_methcall+"meth_unite.{chrom}.log", chrom=CHROMS_CANON)
-     shell:
-       """
-         {tools}/Rscript {DIR_scripts}/Unite_meth.R \
-                 --inputfiles="{input}" \
-                 --destrandTfile={output.destrandTfile} \
-                 --destrandFfile={output.destrandFfile} \
-                 --inputdir={params.inputdir} \
-                 --samples="{params.samples}" \
-                 --treatments="{params.treatments}" \
-                 --assembly="{params.assembly}" \
-                 --cores={params.cores} \
-                 --logFile={log}
-         """
-
-rule filter_and_canonical_chroms:
-     input:
-         tabixfile     =  expand(DIR_methcall+"{{sample}}/{{sample}}_{chrom}_cpg.txt.bgz", chrom=CHROMS_CANON)
-     output:
-         outputfile    = expand(DIR_methcall+"{{sample}}/{{sample}}_{chrom}_cpg_filtered.txt.bgz", chrom=CHROMS_CANON)
-     params:
-         mincov      = MINCOV,
-         save_folder = DIR_methcall+"{sample}/",
-         sample_id = "{sample}",
-         canon_chrs_file = chromcanonicalfile,
-         assembly    = ASSEMBLY,
-         hi_perc=99,
-         cores=10
-     log:
-         expand(DIR_methcall+"{{sample}}/{{sample}}_{chrom}.meth_calls_filter.log", chrom=CHROMS_CANON)
-     message: ""
-     shell:
-       """
-         {tools}/Rscript {DIR_scripts}/Filter_meth.R \
-                 --tabixfile={input.tabixfile} \
-                 --mincov={params.mincov} \
-                 --hi_perc={params.hi_perc} \
-                 --save_folder={params.save_folder} \
-                 --sample_id={params.sample_id} \
-                 --assembly={params.assembly} \
-                 --cores={params.cores} \
-                 --canon_chrs_file={params.canon_chrs_file} \
-                 --logFile={log}
-         """
-
-
-rule methCall_CpG:
-     input:
-         bamfile = expand(DIR_deduped+"{{sample}}/{{sample}}_{chrom}.dedup.sorted.bam", chrom=CHROMS_CANON)
-     output:
-         callFile = expand(DIR_methcall+"{{sample}}/{{sample}}_{chrom}_cpg.txt.bgz", chrom=CHROMS_CANON)
-     params:
-         assembly    = ASSEMBLY,
-         mincov      = MINCOV,
-         minqual     = MINQUAL,
-         context     = "CpG",
-         save_db      = True,
-         save_folder = DIR_methcall+"{sample}/",
-         sample_id = "{sample}"
-     log:
-         expand(DIR_methcall+"{{sample}}/{{sample}}.{chrom}.meth_calls.log", chrom=CHROMS_CANON)
-     message: "Extract methylation calls from bam file."
-     shell:
-       """
-          {tools}/Rscript {DIR_scripts}/methCall.R \
-                 --inBam={input.bamfile} \
-                 --assembly={params.assembly} \
-                 --mincov={params.mincov} \
-                 --minqual={params.minqual} \
-                 --context={params.context} \
-                 --save_db={params.save_db}  \
-                 --save_folder={params.save_folder}  \
-                 --logFile={log}
-       """
-
-rule sort_index_dedup:
-     input:
-         expand(DIR_deduped+"{{sample}}/{{sample}}_{chrom}.dedup.bam", chrom=CHROMS_CANON)
-     output:
-         expand(DIR_deduped+"{{sample}}/{{sample}}_{chrom}.dedup.sorted.bam", chrom=CHROMS_CANON)
+         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam"
      params:
          sort_args = config['args']['sambamba_sort'],
-         tmpdir=DIR_deduped+"{sample}/"
+         tmpdir=DIR_deduped_picard+"{sample}/per_chrom/"
      log:
-         expand(DIR_deduped+"{{sample}}/{{sample}}_{chrom}sort.log", chrom=CHROMS_CANON)
+         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_sort.log"
      shell:
          "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
 
-
-
-rule deduplication:
+rule dedup_picard_perchr:
      input:
-         expand(DIR_mapped+"{{sample}}/{{sample}}_{chrom}.sorted.bam", chrom=CHROMS_CANON)
+         DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam"
      output:
-        outfile=expand(DIR_deduped+"{{sample}}/{{sample}}_{chrom}.dedup.bam", chrom=CHROMS_CANON),
-        metrics = expand(DIR_deduped+"{{sample}}/{{sample}}_{chrom}.deduplication.metrics.txt", chrom=CHROMS_CANON)
+        outfile=DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.bam",
+        metrics = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.deduplication.metrics.txt"
      params:
          picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
      log:
-         expand(DIR_deduped+"{{sample}}/{{sample}}_deduplication.{chrom}", chrom=CHROMS_CANON)
+         DIR_deduped_picard+"{sample}/per_chrom/{sample}_deduplication.{chrom}.log"
      message:
           "Deduplicating paired-end aligned reads from {input}"
      shell:
           """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
           M={output.metrics} \
           REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
-          > {log}.log \
+          > {log} \
           2> {log}.err"""
 
+# ==========================================================================================
+# Split bam file per chromosome:
 
 rule split_bam_per_chr:
-  input:  
+  input:
     DIR_mapped+"{sample}/{sample}_sorted.bam"
-  output: 
-    expand(DIR_mapped+"{{sample}}/{{sample}}_{chrom}.sorted.bam", chrom=CHROMS_CANON)
-  run:
-    for chrom in CHROMS_CANON:
-      mycmd = "%s/sambamba slice --output-filename %s %s %s" % (tools, output[0], input[0], chrom)
-      shell(mycmd)
- 
- 
-#      
-# rule sort_index_bam_mapped:
-#   input:
-#     DIR_mapped+"{sample}/{sample}.bam"
-#   output:
-#     DIR_mapped+"{sample}/{sample}_sorted.bam"
-#   params:
-#     sort_args = config['args']['sambamba_sort'],
-#     tmpdir=DIR_mapped+"{sample}/"
-#   log:
-#     DIR_mapped+"{sample}/{sample}_sort.log"
-#   shell:
-#     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
+  output:
+    DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam"
+  params:
+    sample = "{sample}",
+    chrom = "{chrom}"
+  log:
+    DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.log"
+  # run: # this way I get "Waiting for output files 5 secs" and I can't get rid of it
+  #   import re, os
+  #   m = re.search('(?<=_)(.*)(?=.bam)', os.path.basename(output[0]))
+  #   chrom = m.group(0).split("_").pop()
+  #   mycmd = "%s/sambamba slice --output-filename=%s %s %s > ~/log.txt" % (tools, output[0], input[0], chrom)
+  #   shell(mycmd)
+  shell: # it cab be propably done in parallel, but this is what works for now.
+    #"for chrom in {CHROMS_CANON}; do {tools}/sambamba slice --output-filename={DIR_mapped}{params.sample}/per_chrom/{params.sample}'_'$chrom'.bam' {DIR_mapped}{params.sample}/{params.sample}_sorted.bam $chrom ; done"
+    "{tools}/sambamba slice --output-filename={output} {input} {params.chrom}"
 
-# 
-# rule align_pe:
-#      input:
-#          refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
-#          refconvert_GA = genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
-#          fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
-#          fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
-#          #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
-#          #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
-#      output:
-#          bam = DIR_mapped+"{sample}/{sample}.bam",
-#          report = DIR_mapped+"{sample}/{sample}_report.txt",
-#          un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
-#          un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz",
-#          odir = DIR_mapped+"{sample}/"
-#      params:
-#         # Bismark parameters
-#          bismark_args = config['args']['bismark'],
-#          genomeFolder = "--genome_folder " + genomedir,
-#          outdir = "--output_dir  "+DIR_mapped+"{sample}/",
-#          #nucCov = "--nucleotide_coverage",
-#          pathToBowtie = "--path_to_bowtie " + config['tools'],
-#          useBowtie2  = "--bowtie2 ",
-#          samtools    = "--samtools_path "+ config['tools']+'samtools',
-#          tempdir     = "--temp_dir "+DIR_mapped+"/{sample}"
-#      log:
-#          DIR_mapped+"{sample}/{sample}_bismark_pe_mapping.log"
-#      message: "Mapping paired-end reads to genome."
-#      run:
-#          commands = [
-# 	   #'{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',
-#          'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
-#          'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
-#          'ln -s '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
-#          'ln -s '+output.odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
-#          ]
-#          for c in commands:
-#             shell(c)
-#           
-# 
-# 
+# ==========================================================================================
+# Process unaligned reads
+
+# treat unaligned reads as single-end, map the into a genome and merge them to a bam
+# file with aligned reads
+include: "./Rules/Unaligned_rules.py"
+
+
+# ==========================================================================================
+# Mapping:
+
+rule sort_index_bam_mapped:
+  input:
+    DIR_mapped+"{sample}/{sample}.bam"
+  output:
+    DIR_mapped+"{sample}/{sample}_sorted.bam"
+  params:
+    sort_args = config['args']['sambamba_sort'],
+    tmpdir=DIR_mapped+"{sample}/"
+  log:
+    DIR_mapped+"{sample}/{sample}_sort.log"
+  shell:
+    "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
+
+
+rule align_pe:
+     input:
+         refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
+         refconvert_GA = genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
+         fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+         fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
+         #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
+         #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
+     output:
+         bam = DIR_mapped+"{sample}/{sample}.bam",
+         report = DIR_mapped+"{sample}/{sample}_report.txt",
+         un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
+         un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz",
+         odir = DIR_mapped+"{sample}/"
+     params:
+        # Bismark parameters
+         bismark_args = config['args']['bismark'],
+         genomeFolder = "--genome_folder " + genomedir,
+         outdir = "--output_dir  "+DIR_mapped+"{sample}/",
+         #nucCov = "--nucleotide_coverage",
+         pathToBowtie = "--path_to_bowtie " + config['tools'],
+         useBowtie2  = "--bowtie2 ",
+         samtools    = "--samtools_path "+ config['tools']+'samtools',
+         tempdir     = "--temp_dir "+DIR_mapped+"/{sample}"
+     log:
+         DIR_mapped+"{sample}/{sample}_bismark_pe_mapping.log"
+     message: "Mapping paired-end reads to genome."
+     run:
+         commands = [
+	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err', ########TODO: uncomment this!!
+         'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
+         'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
+         'ln -s '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
+         'ln -s '+output.odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
+         ]
+         for c in commands:
+            shell(c)
+            
+# ==========================================================================================
+# Pre-mapping rules:
+
+include: "./Rules/Prealign_rules.py"
+
+

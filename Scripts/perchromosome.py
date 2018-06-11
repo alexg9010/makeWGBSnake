@@ -1,3 +1,219 @@
+
+
+
+# rule merge_united_methcalls:
+#      input:
+#          destrandTfile_perchrom = [DIR_methcall+"methylBase_per_chrom/"+chrom+"/methylBaseDB.obj_filtered_destrandF."+chrom+".RDS" for chrom in CHROMS_CANON]
+#          #destrandFfile_perchrom = expand(DIR_methcall+"methylBase_per_chrom/methylBaseDB.obj_filtered_destrandF.{chrom}.RDS",chrom=CHROMS_CANON)
+#      output:
+#          destrandTfile_perchrom = DIR_methcall+"methylBase_per_chrom/methylBaseDB.obj_filtered_destrandF.RDS"
+#          #destrandFfile_perchrom = DIR_methcall+"methylBase_per_chrom/methylBaseDB.obj_filtered_destrandF.RDS"
+#      run:
+#        R("""
+# 
+#        inputfiles = "{input.destrandTfile_perchrom}"
+#        outputfile = "{output.destrandTfile_perchrom}"
+#        print(inputfiles)
+#        
+#        library(methylKit)
+#        
+#        inputs <- strsplit(inputfiles, " ", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]]
+#        a = lapply(inputs, readRDS)
+#        #print(a)
+#        """)
+# 
+# rule unite_meth_calls_perchr:
+#      input:
+#          [DIR_methcall+sample+"/per_chrom/"+sample+"_{chrom}_cpg_filtered.txt.bgz" for sample in SAMPLES]
+#      output:
+#          destrandTfile_perchrom = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBaseDB.obj_filtered_destrandT.{chrom}.RDS",
+#          destrandFfile_perchrom = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBaseDB.obj_filtered_destrandF.{chrom}.RDS",
+#          destrandTfile_perchrom_tbx = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_filtered_destrandT.{chrom}.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
+#          destrandFfile_perchrom_tbx = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_filtered_destrandF.{chrom}.txt.bgz"
+#      params:
+#          inputdir = DIR_methcall,
+#          samples = SAMPLES,
+#          treatments = TREATMENT,
+#          assembly=ASSEMBLY,
+#          cores=24,
+#          savedb=True,
+#          adbdir = DIR_methcall+"methylBase_per_chrom/{chrom}/",
+#          suffixT = "filtered_destrandT.{chrom}",
+#          suffixF = "filtered_destrandF.{chrom}",
+#      log: DIR_methcall+"methylBase_per_chrom/meth_unite.log"
+#      shell:
+#        """
+#          {tools}/Rscript {DIR_scripts}/Unite_meth.R \
+#                  --inputfiles="{input}" \
+#                  --destrandTfile={output.destrandTfile_perchrom} \
+#                  --destrandFfile={output.destrandFfile_perchrom} \
+#                  --inputdir={params.inputdir} \
+#                  --samples="{params.samples}" \
+#                  --treatments="{params.treatments}" \
+#                  --assembly="{params.assembly}" \
+#                  --cores={params.cores} \
+#                  --savedb={params.savedb} \
+#                  --logFile={log} \
+#                  --adbdir={params.adbdir} \
+#                  --suffixT={params.suffixT} \
+#                  --suffixF={params.suffixF}
+# 
+#          """
+# 
+# 
+# rule filter_and_canon_chroms_perchr:
+#      input:
+#          tabixfile     =  DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz"
+#      output:
+#          outputfile    = DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg_filtered.txt.bgz"
+#      params:
+#          mincov      = MINCOV,
+#          save_folder = DIR_methcall+"{sample}/per_chrom/",
+#          sample_id = "{sample}",
+#          canon_chrs_file = chromcanonicalfile,
+#          assembly    = ASSEMBLY,
+#          hi_perc=99.9,
+#          cores=10
+#      log:
+#          DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}.meth_calls_filter.log"
+#      message: ""
+#      shell:
+#        """
+#          {tools}/Rscript {DIR_scripts}/Filter_meth.R \
+#                  --tabixfile={input.tabixfile} \
+#                  --mincov={params.mincov} \
+#                  --hi_perc={params.hi_perc} \
+#                  --save_folder={params.save_folder} \
+#                  --sample_id={params.sample_id} \
+#                  --assembly={params.assembly} \
+#                  --cores={params.cores} \
+#                  --canon_chrs_file={params.canon_chrs_file} \
+#                  --logFile={log};
+#          """
+
+
+#############
+
+# rule unite_meth_calls:
+#      input:
+#          [DIR_methcall+sample+"/"+sample+"_cpg_filtered.txt.bgz" for sample in SAMPLES]
+#      output:
+#          destrandTfile_perchrom = DIR_methcall+"methylBase/methylBaseDB.obj_filtered_destrandT.RDS",
+#          destrandFfile_perchrom = DIR_methcall+"methylBase/methylBaseDB.obj_filtered_destrandF.RDS",
+#          destrandTfile_perchrom_tbx = DIR_methcall+"methylBase/methylBase_filtered_destrandT.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
+#          destrandFfile_perchrom_tbx = DIR_methcall+"methylBase/methylBase_filtered_destrandF.txt.bgz"
+#      params:
+#          inputdir = DIR_methcall,
+#          samples = SAMPLES,
+#          treatments = TREATMENT,
+#          assembly=ASSEMBLY,
+#          cores=24,
+#          savedb=True,
+#          adbdir = DIR_methcall+"methylBase/",
+#          suffixT = "filtered_destrandT",
+#          suffixF = "filtered_destrandF",
+#      log: DIR_methcall+"methylBase/meth_unite.log"
+#      shell:
+#        """
+#          {tools}/Rscript {DIR_scripts}/Unite_meth.R \
+#                  --inputfiles="{input}" \
+#                  --destrandTfile={output.destrandTfile_perchrom} \
+#                  --destrandFfile={output.destrandFfile_perchrom} \
+#                  --inputdir={params.inputdir} \
+#                  --samples="{params.samples}" \
+#                  --treatments="{params.treatments}" \
+#                  --assembly="{params.assembly}" \
+#                  --cores={params.cores} \
+#                  --savedb={params.savedb} \
+#                  --logFile={log} \
+#                  --adbdir={params.adbdir} \
+#                  --suffixT={params.suffixT} \
+#                  --suffixF={params.suffixF}
+# 
+#          """
+
+
+# rule filter_and_canon:
+#      input:
+#          tabixfile     =  DIR_methcall+"{sample}/{sample}_cpg.txt.bgz"
+#      output:
+#          outputfile    = DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz"
+#      params:
+#          mincov      = MINCOV,
+#          save_folder = DIR_methcall+"{sample}/",
+#          sample_id = "{sample}",
+#          canon_chrs_file = chromcanonicalfile,
+#          assembly    = ASSEMBLY,
+#          hi_perc=99,
+#          cores=10
+#      log:
+#          DIR_methcall+"{sample}/{sample}.meth_calls_filter.log"
+#      message: ""
+#      shell:
+#        """
+#          {tools}/Rscript {DIR_scripts}/Filter_meth.R \
+#                  --tabixfile={input.tabixfile} \
+#                  --mincov={params.mincov} \
+#                  --hi_perc={params.hi_perc} \
+#                  --save_folder={params.save_folder} \
+#                  --sample_id={params.sample_id} \
+#                  --assembly={params.assembly} \
+#                  --cores={params.cores} \
+#                  --canon_chrs_file={params.canon_chrs_file} \
+#                  --logFile={log};
+#          """
+
+# rule merge_methCall_CpG:
+#      input:
+#          callFiles = [DIR_methcall+"{sample}/per_chrom/{sample}_"+chrom+"_cpg.txt.bgz" for chrom in CHROMS_CANON]
+#      output:
+#          callFiles_merged = DIR_methcall+"{sample}/{sample}_cpg.txt.bgz"
+#      params:
+#          cores=20,
+#          outfilename = "{sample}_cpg.txt",
+#          outdir = DIR_methcall+"{sample}/"
+#      run:
+#         R("""
+#         inputfiles = "{input.callFiles}"
+#         cores = as.numeric("{params.cores}")
+#         outfilename = "{params.outfilename}"
+#         outdir = "{params.outdir}"
+#         
+#         inputs <- strsplit(inputfiles, " ", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]]
+#         
+#         
+#         library(methylKit)
+#         
+#        # this works only on metylBase object I guess  
+#        # methylKit:::mergeTabix(tabixList=inputs,
+#        #                                  dir=outdir,
+#        #                                  filename=outfilename,
+#        #                                  mc.cores=cores,
+#        #                                  all=FALSE)
+#        
+#        
+#        methylKit:::mergeTabix(tabixList=c("/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/methylBase_per_chrom/chr1/methylBase_filtered_destrandF.chr1.txt.bgz","/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/methylBase_per_chrom/chr2/methylBase_filtered_destrandF.chr2.txt.bgz"
+#        ),
+#                                         dir="/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/",
+#                                         filename="tmp",
+#                                         mc.cores=20,
+#                                         all=FALSE)
+#         """)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ############################## PER CHROMOSOME
 rule
 export_bigwig:

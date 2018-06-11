@@ -54,12 +54,10 @@ argsL <- as.list(as.character(argsDF$V2))
 
 names(argsL) <- argsDF$V1
 
-
 ## catch output and messages into log file
-# out <- file(argsL$logFile, open = "wt")
-# sink(out,type = "output")
-# sink(out, type = "message")
-
+out <- file(argsL$logFile, open = "wt")
+sink(out,type = "output")
+sink(out, type = "message")
 
 
 # Run Functions -----------------------------------------------------------
@@ -71,15 +69,12 @@ names(argsL) <- argsDF$V1
 library("methylKit")
 
 input     <- argsL$inBam
-#sample_id  <- argsL$sample_id
+sample_id  <- argsL$sample_id
 assembly  <- argsL$assembly
 mincov    <- as.numeric(argsL$mincov)
 minqual   <- as.numeric(argsL$minqual)
 save_folder <- argsL$save_folder
 save_db <- argsL$save_db
-
-sample_id = strsplit(basename(input), "[.]")[[1]][1]
-
 
 ### Extract Methylation Calls
 

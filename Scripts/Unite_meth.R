@@ -54,7 +54,10 @@ argsL <- as.list(as.character(argsDF$V2))
 
 names(argsL) <- argsDF$V1
 
-## catch output and messages into log file
+saveRDS(argsL, "~/argsL.RDS")#######################
+
+
+# ## catch output and messages into log file
 out <- file(argsL$logFile, open = "wt")
 sink(out,type = "output")
 sink(out, type = "message")
@@ -71,6 +74,12 @@ samples <- strsplit(argsL$samples, " ", fixed = FALSE, perl = FALSE, useBytes = 
 treatments <- as.numeric( strsplit(argsL$treatments, " ", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]] )
 cores <- as.numeric(argsL$cores)
 assembly = argsL$assembly
+save.db = argsL$savedb
+suffixT= argsL$suffixT
+suffixF= argsL$suffixF
+dbdir= argsL$adbdir
+
+dir.create(dbdir)
 
 ## Read data
 methylRawDB.list.obj_filtered = mclapply(1:length(inputs), function(i)
@@ -86,24 +95,35 @@ methylRawListDB.obj_filtered@treatment = treatments
 ## Unite
 if( length(methylRawListDB.obj_filtered)>1 ){
   # destranded=TRUE
-  meth.deT=unite(methylRawListDB.obj_filtered, destrand=TRUE, save.db = FALSE)
+  meth.deT=unite(methylRawListDB.obj_filtered, 
+                 destrand=TRUE, 
+                 save.db = save.db,
+                 suffix = suffixT,
+                 dbdir=dbdir)
   # its faster to save methylBaseDB object into RDS and then to read it
   # than save it again as a list of tabix files.
   saveRDS(meth.deT, destrandTfile)
   
   # destranded=FALSE
-  meth.deF=unite(methylRawListDB.obj_filtered, destrand=FALSE, save.db = FALSE)
+  meth.deF=unite(methylRawListDB.obj_filtered, 
+                 destrand=FALSE, 
+                 save.db = save.db,
+                 suffix = suffixF,
+                 dbdir=dbdir)
   saveRDS(meth.deF, destrandFfile)
-  
+  print("AAAAAAAAAAAAAAa")
 }else{ # is there is only 1 sample
-
+  
+  print("DUUUUUUUUUPPPPPPPPPAAAAAAAAAAAAA")
+  
+  #treatments = 0 # there is only 1 treatment
   methylRawDB.2.methylBase = function(object, 
                                       sample.ids="sampleid",
                                       treatments=0, 
                                       destranded=TRUE,
                                       resolution="base"){
     
-    new("methylBase",getData(object)[,-1],
+    new("methylBase",getData(object),
         sample.ids=sample.ids,
         assembly=object@assembly,
         context=object@context,
@@ -121,21 +141,41 @@ if( length(methylRawListDB.obj_filtered)>1 ){
                                       sample.ids=samples, 
                                       treatments=treatments, 
                                       destranded=TRUE)
+  
+  # save as RDS
   saveRDS(meth.deT, destrandTfile)
+  
+  # save as tabix
+  my.make.tabix = function(obj, dbpath, suffix){
+    
+    meth.de.data = obj@.Data
+    meth.de.data[[1]] = as.character(meth.de.data[[1]]) # chromosome
+    mydf = as.data.frame(do.call("cbind",meth.de.data))
+    colnames(mydf) = obj@names
+    meth.deDB = methylKit:::makeMethylBaseDB(mydf,
+                                              dbpath=dbpath,
+                                              dbtype="tabix",
+                                              obj@sample.ids, obj@assembly ,obj@context,
+                                              obj@resolution,obj@treatment,obj@coverage.index,
+                                              obj@numCs.index,obj@numTs.index,obj@destranded,
+                                              suffix=suffix)
+    return(meth.deDB)
+  }
+  
+  meth.deTDB = my.make.tabix(meth.deT, dbdir, suffixT)
+  
   
   # destranded=FALSE
   meth.deF = methylRawDB.2.methylBase(object, 
                                       sample.ids=samples, 
                                       treatments=treatments, 
                                       destranded=FALSE)
+  # save as RDS
   saveRDS(meth.deF, destrandFfile)
+  
+  # save as tabix file
+  meth.deFDB = my.make.tabix(meth.deF, dbdir, suffixF)
+  
 }
-
-
-
-
-
-
-
 
 

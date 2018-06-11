@@ -6,12 +6,15 @@ tools: "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/"
 env: "./Envs/env.yaml"
 chromsfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.sizes"
 chromcanonicalfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.canon.sizes"
+assembly: "hg38"
 args:
   fastqc: ''
   trim_galore: " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  "
   bismark: " --multicore 6 -N 0 -L  15  --score_min L,0,-0.6 --ambig_bam  --unmapped --ambiguous --maxins 1000  "
   bismark_unmapped: " --multicore 6 -N 0 -L 15  --score_min L,0,-0.6  "
   methCall: ''
+  MINCOV: "10"
+  MINQUAL: "20"
   multiQC: ''
   bismark_genome_preparation: ''
   sambamba_sort: " --memory-limit=30G --tmpdir=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38/temp/ -t 1"
@@ -94,7 +97,7 @@ treatment2:
 
 
 # Here is info how I ran it:
-#  snakemake -s ./Snakemake_postprocessing.py -j 24  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds  --latency-wait 20000  --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
+#  snakemake -s ./Snakemake_postprocessing.py --keep-going -j 24  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds  --latency-wait 20000  --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
 
 
 

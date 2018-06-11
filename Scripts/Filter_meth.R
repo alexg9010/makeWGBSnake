@@ -54,11 +54,12 @@ argsL <- as.list(as.character(argsDF$V2))
 
 names(argsL) <- argsDF$V1
 
+saveRDS(argsL, "~/argsL.RDS")
 
 ## catch output and messages into log file
-out <- file(argsL$logFile, open = "wt")
-sink(out,type = "output")
-sink(out, type = "message")
+# out <- file(argsL$logFile, open = "wt")
+# sink(out,type = "output")
+# sink(out, type = "message")
 
 input     <- argsL$tabixfile
 sample_id  <- argsL$sample_id
@@ -71,7 +72,7 @@ cores<- argsL$cores
 chromcanonicalfile<-argsL$canon_chrs_file
 
 # Extract sample id
-sample_id = strsplit(basename(input), "[.]")[[1]][1]
+#sample_id = strsplit(basename(input), "[.]")[[1]][1]
 
 # Run Functions -----------------------------------------------------------
 
@@ -95,23 +96,25 @@ df.chroms = read.table(chromcanonicalfile, sep="\t", stringsAsFactors = FALSE)
 # From data.frame to GRanges:
 df.chroms <- data.frame(chrom=df.chroms[,1], start=1, end=df.chroms[,2])
 gr.chroms <- as(df.chroms, "GRanges")
-print(gr.chroms)
 
 # Tehre can be situation when there will be no canonical chromosomses in the methylRawDB.obj
 # and then selectByOverlap throws an error
 # such as 'Error: scanTabix: 'chr9' not present in tabix index'
 get.canon.chroms.methylRawDB.obj = function(methylRawDB.obj, gr.chroms, canonical_chromosomes, cores){
   
-  n.ranges.per.chr = as.numeric(unlist(mclapply(canonical_chromosomes, function(chr){
-    nrow(methylKit:::getTabixByChr(methylRawDB.obj@dbpath,
+  n.ranges.per.chr = unlist(mclapply(canonical_chromosomes, function(chr){
+      tryCatch( # there might be canonical chromosomes that are not in methylRawDB.obj object
+               nrow(methylKit:::getTabixByChr(methylRawDB.obj@dbpath, #Rsamtools::countTabix
                                    chr=chr,
-                                   return.type="data.table"
-                                   )
-         )
-  }, mc.cores=cores)))
-  can.chrs.methylRawDB = canonical_chromosomes[!(n.ranges.per.chr==0 | is.na(n.ranges.per.chr))]
+                                   return.type="data.table")), 
+               error=function(e) 
+                 return(NA)
+                 )
+  }, mc.cores=cores))
+  can.chrs.methylRawDB = canonical_chromosomes[!(n.ranges.per.chr==0 | is.na(n.ranges.per.chr) | is.null(n.ranges.per.chr) )]
   if(length(can.chrs.methylRawDB)==0){
-    stop("There are no ranges from canonical chromosomes in the methylation calling file.")
+    warning("There are no ranges from canonical chromosomes in the methylation calling file.")
+    can.chrs.methylRawDB=c() # its for testing, in real life shouldnt happen
   }
   return(can.chrs.methylRawDB)
 }

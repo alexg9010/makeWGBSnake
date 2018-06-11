@@ -16,7 +16,7 @@
       "multiQC" : "",
       "bismark_genome_preparation" : "",
       "sambamba_sort":"",
-      "picard_MarkDuplicates_args":""
+      "picard_MarkDuplicates_args":" MAX_RECORDS_IN_RAM=30000 "
     },
     "treatment" : ['0','1']
 
