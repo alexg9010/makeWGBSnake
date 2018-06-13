@@ -86,16 +86,16 @@ FINAL_FILES = []
 #    expand(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam", sample=SAMPLES, chrom=CHROMS_CANON)
 # )
 # 
-# Sorting
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
-)
-
-
-# Align unmapped reads as sinle-end
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
-)
+# # Sorting
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
+# )
+# 
+# 
+# # Align unmapped reads as sinle-end
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+# )
 
 # Merge PE and SE reads
 FINAL_FILES.extend(
@@ -323,7 +323,7 @@ rule align_pe:
      message: "Mapping paired-end reads to genome."
      run:
          commands = [
-	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err', ########TODO: uncomment this!!
+	       #'{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',
          'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
          'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
          'ln -s '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
@@ -332,6 +332,21 @@ rule align_pe:
          for c in commands:
             shell(c)
             
+
+# rule split:
+#      input:
+#          DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz"
+#      output:
+#          
+#      params:
+#          lines = 1000000
+#      message:
+#          "Splitting file {input} into {params.parts} parts."
+#      shell:
+#        "zcat tmp.fq.gz | split --lines=10000000 - bigfile-split. --numeric-suffixes  --filter='gzip > $FILE.gz'"          
+#        
+
+         
 # ==========================================================================================
 # Pre-mapping rules:
 
