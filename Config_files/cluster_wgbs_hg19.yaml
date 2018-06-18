@@ -1,12 +1,12 @@
 ---
 input: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw_merged_lanes/"
-output: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38/"
-genome: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/"
+output: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg19_pe_L0-0.6_clipr1_10_3primer1_5_clip2_70_3primer2_5_gap1kb/"
+genome: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/"
 tools: "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/"
 env: "./Envs/env.yaml"
 chromsfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.sizes"
 chromcanonicalfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.canon.sizes"
-assembly: "hg38"
+assembly: "hg19"
 args:
   fastqc: ''
   trim_galore: " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  "
@@ -17,7 +17,7 @@ args:
   MINQUAL: "20"
   multiQC: ''
   bismark_genome_preparation: ''
-  sambamba_sort: " --memory-limit=30G --tmpdir=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38/temp/ -t 1"
+  sambamba_sort: " --memory-limit=30G --tmpdir=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg19_pe_L0-0.6_clipr1_10_3primer1_5_clip2_70_3primer2_5_gap1kb/temp/ -t 1"
   picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=30000 "
 samples:
 - '22X3H1'

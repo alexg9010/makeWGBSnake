@@ -72,45 +72,6 @@ if( length(methRaw.gr.per.chr.len.2.remove)>=1 ){
                               pruning.mode="coarse")
 }
 
-#' ############################  TO REMOVE
-#' #' @param ... arguments to \code{\link[fastseg]{fastseg}} function in fastseg 
-#' #'        package, or to \code{\link[mclust]{densityMclust}}
-#' #'        in Mclust package, could be used to fine tune the segmentation algorithm.
-#' #'        E.g. Increasing "alpha" will give more segments. 
-#' #'        Increasing "cyberWeight" will give also more segments."maxInt" controls
-#' #'        the segment extension around a breakpoint. "minSeg" controls the minimum
-#' #'        segment length. "G" argument
-#' #'        denotes number of components used in BIC selection in mixture modeling.
-#' #'        For more details see fastseg and Mclust documentation.
-#' dens = densityMclust(score.gr$seg.mean,... )
-#' # mclust densityMclust
-#' 
-#' dens = densityMclust(faithful$waiting)
-#' summary(dens)
-#' summary(dens, parameters = TRUE)
-#' plot(dens, what = "BIC", legendArgs = list(x = "topright"))
-#' plot(dens, what = "density", data = faithful$waiting)
-#' 
-#' methRaw.gr$score
-#' 
-#' res.gr = methSeg(methRaw.gr, diagnostic.plot=FALSE)
-#' 
-#' methylRawListDB.obj_filtered[[1]]
-#' a=methylRawListDB.obj_filtered[[1]][1:10000]
-#' a = methylRawListDB.obj_filtered[[1]][methylRawListDB.obj_filtered[[1]]$chr=="chr2"]
-#' methRaw.gr=as(a, "GRanges")
-#' 
-#' mcols(methRaw.gr)$meth=100*methRaw.gr$numCs/methRaw.gr$coverage
-#' ##destrand
-#' strand(methRaw.gr) <- "*"
-#' ##sort 
-#' methRaw.gr <- sort(methRaw.gr[,"meth"])
-#' 
-#' library(mclust)
-#' mod4 <- densityMclust(methRaw.gr$meth)
-#' ########################
-
-
 png(filename = pngFile,units = "in",width = 8,height = 4.5,res=300)
 res.gr = methSeg(methRaw.gr, diagnostic.plot=TRUE)
 dev.off()
