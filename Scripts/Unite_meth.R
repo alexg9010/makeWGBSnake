@@ -111,11 +111,9 @@ if( length(methylRawListDB.obj_filtered)>1 ){
                  suffix = suffixF,
                  dbdir=dbdir)
   saveRDS(meth.deF, destrandFfile)
-  print("AAAAAAAAAAAAAAa")
 }else{ # is there is only 1 sample
   
-  print("DUUUUUUUUUPPPPPPPPPAAAAAAAAAAAAA")
-  
+
   #treatments = 0 # there is only 1 treatment
   methylRawDB.2.methylBase = function(object, 
                                       sample.ids="sampleid",

@@ -3,7 +3,7 @@
 # WGBS pipeline
 #
 # Copyright © 2018 Katarzyna Wreczycka katarzyna.wreczycka@mdc-berlin.de
-#
+# This pipeline is heavily based on the PiGx BSseq pipeline github.com/BIMSBbioinfo/pigx_bsseq
 
 import glob, os, re
 from snakemake.utils import R
@@ -27,10 +27,14 @@ try:
 except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
-TREATMENT = config['treatment']
-TREATMENT_UNIQUE = set(TREATMENT)
-SAMPLE_TREAT_DICT = dict(zip(SAMPLES, TREATMENT))
-
+try:
+  TREATMENT = config['treatment']
+  TREATMENT_UNIQUE = set(TREATMENT)
+  SAMPLE_TREAT_DICT = dict(zip(SAMPLES, TREATMENT))
+except KeyError:
+  print("No treatment supplied")
+  TREATMENT, TREATMENT_UNIQUE,AMPLE_TREAT_DICT = [],[],[]
+  
 CHROMS = [line.rstrip('\n').split("\t")[0] for line in open(chromsfile)] 
 CHROMS_LENGTH = [line.rstrip('\n').split("\t")[1] for line in open(chromsfile)]
 CHROMS_CANON = [line.rstrip('\n').split("\t")[0] for line in open(chromcanonicalfile)]
@@ -44,7 +48,7 @@ MINQUAL=ARGS["MINQUAL"]
 # Output directories
 
 WORKDIR = os.getcwd() + "/"                         
-DIR_scripts   = './Scripts/'
+DIR_scripts   = '/fast/users/kwreczy_m/projects/makeWGBSnake/Scripts/'
 
 DIR_plots = outputdir+'plots/'
 DIR_bigwig      = outputdir+'07_bigwig_files/'
@@ -76,11 +80,11 @@ FINAL_FILES = []
 #   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
 # )
 # 
-# # Alignment
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
-# )
-# 
+# Alignment
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
+)
+
 # # Split files per chromosome
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam", sample=SAMPLES, chrom=CHROMS_CANON)
@@ -90,18 +94,21 @@ FINAL_FILES = []
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 # )
-# 
-# 
-# # Align unmapped reads as sinle-end
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
-# )
 
-# Merge PE and SE reads
+# Align unmapped reads as sinle-end
 FINAL_FILES.extend(
-  expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
 )
-
+# ## Single-end
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_sorted.bam",sample=SAMPLES)
+# )
+# 
+# # Merge PE and SE reads
+# FINAL_FILES.extend(
+#   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+# )
+# 
 # Sort merged PE and SE reads
 FINAL_FILES.extend(
   expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
@@ -111,16 +118,38 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
 # )
-# 
+# # Deduplicate PE+SE
+# FINAL_FILES.extend(
+#   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+
+
 # # Methylation call. files
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
 # )
+# # Methylation call. files PE+SE
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+
 # 
 # # Merge methylation calling
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz",sample=SAMPLES)
 # )
+# # Merge methylation calling PE+SE
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.txt.bgz",sample=SAMPLES)
+# )
+
+# Unite methylation calling PE+SE
+# FINAL_FILES.extend(
+#    [DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt.bgz"]
+# )
+
+
+
 # 
 # # Segmentation
 # ##FINAL_FILES.extend(
@@ -129,6 +158,14 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #   expand(DIR_seg+"{sample}/per_chrom/{sample}_{chrom}.deduped_meth_segments.bed", sample=SAMPLES, chrom=CHROMS_CANON)
 # )
+# FINAL_FILES.extend(
+#   expand(DIR_seg+"{sample}/per_chrom/{sample}_{chrom}_merged.deduped_meth_segments.bed", sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+
+# FINAL_FILES.extend(
+#   expand(DIR_seg+"{sample}/{sample}.pe.se.deduped_meth_segments_gr.RDS", sample=SAMPLES)
+# )
+
 # 
 # # Differential methylation between subgroups, pairwise
 # FINAL_FILES.extend(
@@ -143,6 +180,21 @@ FINAL_FILES.extend(
 # ## FINAL_FILES.extend(
 # ##     expand(DIR_bigwig+"{sample}/per_chrom/{sample}_{chrom}.bw", sample=SAMPLES, chrom=CHROMS_CANON)
 # ## )
+# # BigWig files
+# FINAL_FILES.extend(
+#     expand(DIR_bigwig+"{sample}/{sample}_merged.bw", sample=SAMPLES)
+# )
+
+
+# hg19_pe_L0-0.6_clipr1_10_3primer1_5_clip2_70_3primer2_5_gap1kb
+# align_unmapped2_se: 
+## MCCDLU, YYGAV6, KJ678J
+# hg38
+# merge_bam_pe_and_se: # " bug
+## AA49P6, L1PP31, 236L96, 5QCV6R, LJ8KVQ, KJ678J, A45S2Q, MCCDLU, EXP2C8, BZZHHV, GW3LEP, L3RXU9,
+# 9J2DTT, WYKWK3, FTMVW6, W2MXGZ, 2P3UF1
+
+
 
 rule target:
   input: FINAL_FILES
@@ -152,99 +204,35 @@ rule target:
 # Snakemake rules
 # ==========================================================================================
 
+
 # ==========================================================================================
 # Segmentation:
-
-include: "./Rules/Segmentation_rules.py"
+#
+# rules for PE and SE+PE
+#include: "./Rules/Segmentation_rules.py"
+include: "./Rules/Segmentation_merged_rules.py"
 
 # ==========================================================================================
 # Differential methylation in a pairwise manner
+#
+# rules for PE and SE+PE
+include: "./Rules/DMC_pairwise.py"
 
-rule diffmeth_pairwise:
-     input:
-         destrandTfile = DIR_methcall+"methylBase_per_chrom/methylBase_cpg_dF.txt.bgz"
-     output:
-         outfile=DIR_diffmeth+'diffmeth_{treat}.RDS'
-     params:
-         treat="{treat}",
-         cores = 4, # with more than 5 usually there is not enough memory
-         treatments = TREATMENT,
-         sampleids = SAMPLES,
-         context = "CpG",
-         assembly=ASSEMBLY,
-         outputdir = DIR_diffmeth,
-         suffix = "diffmeth_{treat}",
-         save_db = True
-     shell:
-         """{tools}/Rscript {DIR_scripts}/MethDiff.R \
-         {input} {output} \
-         {params.treat} {params.cores} "{params.treatments}" "{params.sampleids}" \
-         {params.context} {params.assembly} \
-         {params.outputdir} {params.suffix} {params.save_db}"""
-        
 
 # ==========================================================================================
 # Export a bigwig file:
+#
+# rules for PE and SE+PE
+include: "./Rules/Export_BW.py"
 
-rule export_bigwig:
-    input:
-        seqlengths = chromcanonicalfile,
-        tabixfile    = DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz"
-    params:
-        sampleid = "{sample}"
-    output:
-        bw         = DIR_bigwig+"{sample}/{sample}.bw",
-    message: "Exporting bigwig files."
-    shell:
-       """
-         {tools}/Rscript {DIR_scripts}/export_bw.R \
-                 {input.tabixfile} \
-                 {input.seqlengths} \
-                 {ASSEMBLY} \
-                 {params.sampleid} \
-                 {output}
-       """
        
 # ==========================================================================================
 # Methylation calling:
 # 
-include: "./Rules/Meth_preprocessing_rules.py"
+# rules for PE and SE+PE
+#include: "./Rules/Meth_preprocessing_rules.py"
+include: "./Rules/Meth_preprocessing_merged_rules.py"
 
-
-# ==========================================================================================
-# Deduplication:
-
-rule sort_index_dedup_perchr:
-     input:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.bam"
-     output:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam"
-     params:
-         sort_args = config['args']['sambamba_sort'],
-         tmpdir=DIR_deduped_picard+"{sample}/per_chrom/"
-     log:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_sort.log"
-     shell:
-         "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
-
-rule dedup_picard_perchr:
-     input:
-         DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam"
-     output:
-        outfile=DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.bam",
-        metrics = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.deduplication.metrics.txt"
-     params:
-         picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
-     log:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_deduplication.{chrom}.log"
-     message:
-          "Deduplicating paired-end aligned reads from {input}"
-     shell:
-          """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
-          M={output.metrics} \
-          REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
-          > {log} \
-          2> {log}.err"""
 
 # ==========================================================================================
 # Split bam file per chromosome:
@@ -294,6 +282,8 @@ rule sort_index_bam_mapped:
     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
 
 
+# FTMVW6
+
 rule align_pe:
      input:
          refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
@@ -323,7 +313,7 @@ rule align_pe:
      message: "Mapping paired-end reads to genome."
      run:
          commands = [
-	       #'{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',
+	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',
          'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
          'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
          'ln -s '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
@@ -332,24 +322,12 @@ rule align_pe:
          for c in commands:
             shell(c)
             
-
-# rule split:
-#      input:
-#          DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz"
-#      output:
-#          
-#      params:
-#          lines = 1000000
-#      message:
-#          "Splitting file {input} into {params.parts} parts."
-#      shell:
-#        "zcat tmp.fq.gz | split --lines=10000000 - bigfile-split. --numeric-suffixes  --filter='gzip > $FILE.gz'"          
-#        
-
-         
+      
 # ==========================================================================================
 # Pre-mapping rules:
 
+# Paired-end
 include: "./Rules/Prealign_rules.py"
 
-
+# Single-end
+include: "./Rules/Prealign_rules_SE.py"

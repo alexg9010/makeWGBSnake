@@ -43,3 +43,13 @@ methylKit:::makeMethTabix(outfile)
 
 
 
+
+
+
+
+
+
+
+
+
+

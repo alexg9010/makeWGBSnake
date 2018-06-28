@@ -1,3 +1,4 @@
+# Copyright © 2018 Katarzyna Wreczycka <Katarzyna.Wreczycka@mdc-berlin.de>
 
 args <- commandArgs(TRUE)
 

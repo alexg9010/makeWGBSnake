@@ -76,6 +76,8 @@ minqual   <- as.numeric(argsL$minqual)
 save_folder <- argsL$save_folder
 save_db <- argsL$save_db
 
+saveRDS(argsL,"~/argsL.RDS")
+
 ### Extract Methylation Calls
 
 ## read bam file into methylKit object

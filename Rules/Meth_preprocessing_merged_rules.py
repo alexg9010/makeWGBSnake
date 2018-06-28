@@ -3,27 +3,40 @@
 # Methylation calling:
 # 
 
-rule merge_united_methcalls:
+rule merge_united_methcalls_pe_se_destrandT:
      input:
-         [DIR_methcall+"methylBase_per_chrom/"+chrom+"/methylBase_cpg_dF_"+chrom+".txt.bgz" for chrom in CHROMS_CANON]
+         [DIR_methcall+"methylBase_per_chrom/"+chrom+"/methylBase_merged_cpg_dT_"+chrom+".txt.bgz" for chrom in CHROMS_CANON]
      output:
-         DIR_methcall+"methylBase_cpg_dF.txt.bgz"
+         DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dT.txt.bgz"
      params:
          cores=20,
-         outfile = DIR_methcall+"methylBase_per_chrom/methylBase_cpg_dF.txt"
+         outfile = DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dT.txt"
+     shell:
+       """
+       {tools}/Rscript {DIR_scripts}/Merge_united_methcalls.R "{input}" {params.outfile} {params.cores}
+       """
+       
+rule merge_united_methcalls_pe_se_destrandF:
+     input:
+         [DIR_methcall+"methylBase_per_chrom/"+chrom+"/methylBase_merged_cpg_dF_"+chrom+".txt.bgz" for chrom in CHROMS_CANON]
+     output:
+         DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt.bgz"
+     params:
+         cores=20,
+         outfile = DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt"
      shell:
        """
        {tools}/Rscript {DIR_scripts}/Merge_united_methcalls.R "{input}" {params.outfile} {params.cores}
        """
 
-rule unite_meth_calls_perchr:
+rule unite_meth_calls_perchr_pe_se:
      input:
-         [DIR_methcall+sample+"/per_chrom/"+sample+"_{chrom}_cpg_filtered.txt.bgz" for sample in SAMPLES]
+         [DIR_methcall+sample+"/per_chrom/"+sample+"_{chrom}_merged_cpg_filtered.txt.bgz" for sample in SAMPLES]
      output:
-         destrandTfile_perchromT = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_cpg_dT_{chrom}.RDS",
-         destrandFfile_perchromF = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_cpg_dF_{chrom}.RDS",
-         destrandTfile_perchrom_tbxT = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_cpg_dT_{chrom}.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
-         destrandFfile_perchrom_tbxF = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_cpg_dF_{chrom}.txt.bgz"
+         destrandTfile_perchromT = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_merged_cpg_dT_{chrom}.RDS",
+         destrandFfile_perchromF = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_merged_cpg_dF_{chrom}.RDS",
+         destrandTfile_perchrom_tbxT = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_merged_cpg_dT_{chrom}.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
+         destrandFfile_perchrom_tbxF = DIR_methcall+"methylBase_per_chrom/{chrom}/methylBase_merged_cpg_dF_{chrom}.txt.bgz"
      params:
          inputdir = DIR_methcall,
          samples = SAMPLES,
@@ -32,9 +45,9 @@ rule unite_meth_calls_perchr:
          cores=24,
          savedb=True,
          adbdir = DIR_methcall+"methylBase_per_chrom/{chrom}/",
-         suffixT = "cpg_dT_{chrom}",
-         suffixF = "cpg_dF_{chrom}",
-     log: DIR_methcall+"methylBase_per_chrom/meth_unite_cpg.log"
+         suffixT = "merged_cpg_dT_{chrom}",
+         suffixF = "merged_cpg_dF_{chrom}",
+     log: DIR_methcall+"methylBase_per_chrom/meth_merged_unite_cpg.log"
      shell:
        """
          {tools}/Rscript {DIR_scripts}/Unite_meth.R \
@@ -53,74 +66,74 @@ rule unite_meth_calls_perchr:
                  --suffixF={params.suffixF}
          """
 
-rule merge_filtered_methcall:
+rule merge_filtered_methcall_pe_se:
      input:
-       [DIR_methcall+"{sample}/per_chrom/{sample}_"+chrom+"_cpg_filtered.txt.bgz" for chrom in CHROMS_CANON]
+       [DIR_methcall+"{sample}/per_chrom/{sample}_"+chrom+"_merged_cpg_filtered.txt.bgz" for chrom in CHROMS_CANON]
      output:
-       tabixfile=DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz"
+       tabixfile=DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.txt.bgz"
      params:
        treatment = TREATMENT,
        sample = "{sample}",
        assembly = ASSEMBLY,
        cores = 4,
-       rdsfile = DIR_methcall+"{sample}/{sample}_cpg_filtered.RDS",
-       tabixfile=DIR_methcall+"{sample}/{sample}_cpg_filtered.txt"
+       rdsfile = DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.RDS",
+       tabixfile=DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.txt"
      run:
         R("""
-
+     
      inputfiles = "{input}"
      outtabix="{params.tabixfile}"
      outrds = "{params.rdsfile}"
      sample = "{params.sample}"
      assembly = "{params.assembly}"
      cores = "{params.cores}"
-
+     
      inputs <- strsplit(inputfiles, " ", fixed = FALSE, perl = FALSE, useBytes = FALSE)[[1]]
 
      library(methylKit)
-
+     
      ## Read data
      methylRawDB.list.obj_filtered = mclapply(1:length(inputs), function(i)
                  methRead(inputs[i],
                           sample,
-                          assembly,
-                          dbtype='tabix'),
+                          assembly, 
+                          dbtype='tabix'), 
                  mc.cores=cores)
-
-     ## Join list of methylRaw objects per chromsoome
+     
+     ## Join list of methylRaw objects per chromsoome 
      ## to one methylRaw object for a given sample
-     list.meth.data = mclapply(methylRawDB.list.obj_filtered,
+     list.meth.data = mclapply(methylRawDB.list.obj_filtered, 
                            function(x) getData(x), mc.cores=cores  )
      mydf = do.call("rbind", list.meth.data)
-
-     new.methylRaw =  new("methylRaw", mydf,
-       sample.id = sample,
+     
+     new.methylRaw =  new("methylRaw", mydf, 
+       sample.id = sample, 
        assembly = assembly,
        context="CpG",
-       resolution="base")
-
-     ## Save
+       resolution="base") 
+       
+     ## Save   
      saveRDS(new.methylRaw, outrds)
      methylKit:::df2tabix(mydf, outtabix)
 
-        """)
+        """)  
+       
 
-
-rule filter_and_canon_chroms_perchr:
+rule filter_and_canon_chroms_perchr_pe_se:
      input:
-         tabixfile     =  DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz"
+         tabixfile     =  DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged_cpg.txt.bgz"
      output:
-         outputfile    = DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg_filtered.txt.bgz"
+         outputfile    = DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged_cpg_filtered.txt.bgz"
      params:
          mincov      = MINCOV,
          save_folder = DIR_methcall+"{sample}/per_chrom/",
-         sample_id = "{sample}_{chrom}_cpg",
+         sample_id = "{sample}_{chrom}_merged_cpg",
          canon_chrs_file = chromcanonicalfile,
          assembly    = ASSEMBLY,
          hi_perc=99.9,
          cores=10
      log:
-         DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}.meth_calls_filter.log"
+         DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged.meth_calls_filter.log"
      message: ""
      shell:
        """
@@ -136,13 +149,13 @@ rule filter_and_canon_chroms_perchr:
                  --logFile={log}
          """
 
-
-
-rule methCall_CpG_perchr:
+        
+         
+rule methCall_CpG_perchr_pe_se:
      input:
-         bamfile = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam"
+         bamfile = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam"
      output:
-         callFile = DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz"
+         callFile = DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged_cpg.txt.bgz"
      params:
          assembly    = ASSEMBLY,
          mincov      = MINCOV,
@@ -150,9 +163,9 @@ rule methCall_CpG_perchr:
          context     = "CpG",
          save_db      = True,
          save_folder = DIR_methcall+"{sample}/per_chrom/",
-         sample_id = "{sample}_{chrom}"
+         sample_id = "{sample}_{chrom}_merged"
      log:
-         DIR_methcall+"{sample}/per_chrom/{sample}.{chrom}.meth_calls.log"
+         DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged.meth_calls.log"
      message: "Extract methylation calls from bam file."
      shell:
        """
@@ -167,37 +180,3 @@ rule methCall_CpG_perchr:
                  --sample_id={params.sample_id} \
                  --logFile={log}
        """
-# ==========================================================================================
-# Deduplication:
-#
-rule sort_index_dedup_perchr:
-     input:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.bam"
-     output:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam"
-     params:
-         sort_args = config['args']['sambamba_sort'],
-         tmpdir=DIR_deduped_picard+"{sample}/per_chrom/"
-     log:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_sort.log"
-     shell:
-         "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
-
-rule dedup_picard_perchr:
-     input:
-         DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam"
-     output:
-        outfile=DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.bam",
-        metrics = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.deduplication.metrics.txt"
-     params:
-         picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
-     log:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_deduplication.{chrom}.log"
-     message:
-          "Deduplicating paired-end aligned reads from {input}"
-     shell:
-          """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
-          M={output.metrics} \
-          REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
-          > {log} \
-          2> {log}.err"""

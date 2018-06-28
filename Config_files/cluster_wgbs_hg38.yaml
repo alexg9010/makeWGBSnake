@@ -97,7 +97,7 @@ treatment2:
 
 
 # Here is info how I ran it:
-#  snakemake -s ./Snakemake_postprocessing.py --keep-going -j 24  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds  --latency-wait 20000  --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
+#  snakemake -s ~/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
 
 
 

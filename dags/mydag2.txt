@@ -1,0 +1,123 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "align_unmapped2_se", color = "0.32 0.6 0.85", style="rounded,dashed"];
+	1[label = "filter_and_canon_chroms_perchr_merged", color = "0.41 0.6 0.85", style="rounded,dashed"];
+	2[label = "meth_segments_perchr_merged", color = "0.25 0.6 0.85", style="rounded,dashed"];
+	3[label = "align_unmapped1_se", color = "0.28 0.6 0.85", style="rounded,dashed"];
+	4[label = "split_merged_se_pe\nchrom: chr1", color = "0.53 0.6 0.85", style="rounded,dashed"];
+	5[label = "split_merged_se_pe\nchrom: chr2", color = "0.53 0.6 0.85", style="rounded,dashed"];
+	6[label = "sort_index_bam_unmapped1_se", color = "0.21 0.6 0.85", style="rounded,dashed"];
+	7[label = "dedup_picard_perchr_merged", color = "0.34 0.6 0.85", style="rounded,dashed"];
+	8[label = "trim_reads_pe\nsample: Sampled_22X3H1", color = "0.23 0.6 0.85", style="rounded,dashed"];
+	9[label = "merge_bam_se_and_pe", color = "0.51 0.6 0.85", style="rounded,dashed"];
+	10[label = "filter_and_canon_chroms_perchr_merged", color = "0.41 0.6 0.85", style="rounded,dashed"];
+	11[label = "merge_filtered_methcall_merged", color = "0.11 0.6 0.85", style="rounded,dashed"];
+	12[label = "sort_index_dedup_perchr_merged", color = "0.07 0.6 0.85", style="rounded,dashed"];
+	13[label = "export_bigwig_merged", color = "0.05 0.6 0.85", style="rounded,dashed"];
+	14[label = "methCall_CpG_perchr_merged", color = "0.57 0.6 0.85", style="rounded,dashed"];
+	15[label = "split_merged_se_pe\nchrom: chr1", color = "0.53 0.6 0.85", style="rounded,dashed"];
+	16[label = "methCall_CpG_perchr_merged", color = "0.57 0.6 0.85", style="rounded,dashed"];
+	17[label = "methCall_CpG_perchr_merged", color = "0.57 0.6 0.85", style="rounded,dashed"];
+	18[label = "sort_index_bam_unmapped2_se", color = "0.00 0.6 0.85", style="rounded,dashed"];
+	19[label = "dedup_picard_perchr_merged", color = "0.34 0.6 0.85", style="rounded,dashed"];
+	20[label = "align_pe", color = "0.02 0.6 0.85", style="rounded,dashed"];
+	21[label = "target", color = "0.37 0.6 0.85", style="rounded,dashed"];
+	22[label = "merge_bam_se_and_pe", color = "0.51 0.6 0.85", style="rounded,dashed"];
+	23[label = "sort_index_bam_unmapped2_se", color = "0.00 0.6 0.85", style="rounded,dashed"];
+	24[label = "sort_index_dedup_perchr_merged", color = "0.07 0.6 0.85", style="rounded,dashed"];
+	25[label = "align_pe", color = "0.02 0.6 0.85", style="rounded,dashed"];
+	26[label = "export_bigwig_merged", color = "0.05 0.6 0.85", style="rounded,dashed"];
+	27[label = "methCall_CpG_perchr_merged", color = "0.57 0.6 0.85", style="rounded,dashed"];
+	28[label = "merge_filtered_methcall_merged", color = "0.11 0.6 0.85", style="rounded,dashed"];
+	29[label = "meth_segments_perchr_merged", color = "0.25 0.6 0.85", style="rounded,dashed"];
+	30[label = "sort_index_bam_mapped", color = "0.46 0.6 0.85", style="rounded,dashed"];
+	31[label = "sort_index_dedup_perchr_merged", color = "0.07 0.6 0.85", style="rounded,dashed"];
+	32[label = "meth_segments_perchr_merged", color = "0.25 0.6 0.85", style="rounded,dashed"];
+	33[label = "filter_and_canon_chroms_perchr_merged", color = "0.41 0.6 0.85", style="rounded,dashed"];
+	34[label = "bismark_genome_preparation", color = "0.16 0.6 0.85", style="rounded,dashed"];
+	35[label = "sort_index_bam_mapped", color = "0.46 0.6 0.85", style="rounded,dashed"];
+	36[label = "split_merged_se_pe\nchrom: chr2", color = "0.53 0.6 0.85", style="rounded,dashed"];
+	37[label = "sort_index_bam_unmapped1_se", color = "0.21 0.6 0.85", style="rounded,dashed"];
+	38[label = "trim_reads_pe\nsample: Sampled_236L96", color = "0.23 0.6 0.85", style="rounded,dashed"];
+	39[label = "sort_index_dedup_perchr_merged", color = "0.07 0.6 0.85", style="rounded,dashed"];
+	40[label = "align_unmapped1_se", color = "0.28 0.6 0.85", style="rounded,dashed"];
+	41[label = "dedup_picard_perchr_merged", color = "0.34 0.6 0.85", style="rounded,dashed"];
+	42[label = "dedup_picard_perchr_merged", color = "0.34 0.6 0.85", style="rounded,dashed"];
+	43[label = "align_unmapped2_se", color = "0.32 0.6 0.85", style="rounded,dashed"];
+	44[label = "filter_and_canon_chroms_perchr_merged", color = "0.41 0.6 0.85", style="rounded,dashed"];
+	45[label = "meth_segments_perchr_merged", color = "0.25 0.6 0.85", style="rounded,dashed"];
+	20 -> 0
+	16 -> 1
+	33 -> 2
+	20 -> 3
+	22 -> 4
+	22 -> 5
+	3 -> 6
+	15 -> 7
+	35 -> 9
+	23 -> 9
+	37 -> 9
+	14 -> 10
+	1 -> 11
+	10 -> 11
+	19 -> 12
+	11 -> 13
+	24 -> 14
+	9 -> 15
+	31 -> 16
+	12 -> 17
+	0 -> 18
+	36 -> 19
+	8 -> 20
+	34 -> 20
+	22 -> 21
+	2 -> 21
+	24 -> 21
+	26 -> 21
+	4 -> 21
+	5 -> 21
+	27 -> 21
+	9 -> 21
+	29 -> 21
+	30 -> 21
+	31 -> 21
+	32 -> 21
+	12 -> 21
+	13 -> 21
+	36 -> 21
+	14 -> 21
+	35 -> 21
+	16 -> 21
+	15 -> 21
+	17 -> 21
+	45 -> 21
+	39 -> 21
+	30 -> 22
+	18 -> 22
+	6 -> 22
+	43 -> 23
+	42 -> 24
+	38 -> 25
+	34 -> 25
+	28 -> 26
+	39 -> 27
+	44 -> 28
+	33 -> 28
+	44 -> 29
+	20 -> 30
+	41 -> 31
+	1 -> 32
+	27 -> 33
+	25 -> 35
+	9 -> 36
+	40 -> 37
+	7 -> 39
+	25 -> 40
+	5 -> 41
+	4 -> 42
+	25 -> 43
+	17 -> 44
+	10 -> 45
+}            

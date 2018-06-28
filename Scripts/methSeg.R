@@ -36,27 +36,48 @@ assembly <- args[5]#argsL$png
 sampleid <- args[6]#argsL$png
 logfile<- args[7]#argsL$png
 
+# a=list(input,
+# output,
+# grFile ,
+# pngFile,
+# assembly,
+# sampleid,
+# logfile)
+# print(a)
+# saveRDS(a, "~/params.RDS")
+
+
 ## catch output and messages into log file
-out <- file(logfile, open = "wt")
-sink(out,type = "output")
-sink(out, type = "message")
+# out <- file(logfile, open = "wt")
+# sink(out,type = "output")
+# sink(out, type = "message")
 
-print(args)
+## read input file
+substrRight <- function(x, n){
+  substr(x, nchar(x)-n+1, nchar(x))
+}
 
-## read input methylRaw
-methRawDB = methRead(input,
-                     sampleid , 
-                     assembly, 
-                     dbtype='tabix')
-
-## convert to GRanges
-methRaw.gr= as(methRawDB,"GRanges")
-## calculate methylation score 
-mcols(methRaw.gr)$meth=100*methRaw.gr$numCs/methRaw.gr$coverage
-##destrand
-strand(methRaw.gr) <- "*"
-##sort 
-methRaw.gr <- sort(methRaw.gr[,"meth"]) 
+if( substrRight(input, 8)==".txt.bgz" ){
+  # if input is a methylRawDB object
+  
+  ## read input methylRaw
+  methRawDB = methRead(input,
+                       sampleid , 
+                       assembly, 
+                       dbtype='tabix')
+  
+  ## convert to GRanges
+  methRaw.gr= as(methRawDB,"GRanges")
+  ## calculate methylation score 
+  mcols(methRaw.gr)$meth=100*methRaw.gr$numCs/methRaw.gr$coverage
+  ##destrand
+  strand(methRaw.gr) <- "*"
+  ##sort 
+  methRaw.gr <- sort(methRaw.gr[,"meth"]) 
+}else{
+  # if input is a Granges object with a column `meth` that indicates % methylation
+  methRaw.gr <- readRDS(input)
+}
 
 ### Segmentation of methylation profile
 
@@ -84,7 +105,7 @@ saveRDS(res.gr,file=grFile)
 
 ## export segments to bed file
 methSeg2bed(segments = res.gr,
-            trackLine = paste0("track name='meth segments ' ",
+            trackLine = paste0("track name='",sampleid,"' ",
                                "description='meth segments of ",
                                methRawDB@sample.id,
                                " mapped to ",
