@@ -22,6 +22,7 @@ chromcanonicalfile = config["chromcanonicalfile"]
 envs = config["env"]
 tools = config['tools']
 ARGS = config['args']
+
 try:
     SAMPLES = config["samples"]
 except KeyError:
@@ -56,7 +57,7 @@ DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
 DIR_mapped      = outputdir+'04_mapping/'
-DIR_posttrim_QC = outputdir+'02_posttrimming_QC/'
+DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 DIR_trimmed     = outputdir+'02_trimming/'
 DIR_rawqc       = outputdir+'01_raw_QC/'
 DIR_bam_per_chrom = DIR_mapped+'bam_per_chr/' 
@@ -64,6 +65,7 @@ DIR_seg = outputdir+'08_segmentation/'
 DIR_diffmeth    = outputdir+'differential_methylation/'
 DIR_ucsc_hub = outputdir+"09_ucsc_hub/"
 DIR_multiqc = outputdir+"multiqc/"
+DIR_ucschub = outputdir+"ucsc_hub/"
 
 
 # ==========================================================================================
@@ -75,11 +77,16 @@ DIR_multiqc = outputdir+"multiqc/"
 FINAL_FILES = []
 
 
-# # FASTQC
-# FINAL_FILES.extend(
-#   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-# )
-# 
+# FASTQC
+FINAL_FILES.extend(
+  expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+)
+
+# Fastqc afater trimming
+FINAL_FILES.extend(
+   expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+)
+
 # Alignment
 FINAL_FILES.extend(
    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
@@ -95,7 +102,11 @@ FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 # )
 
-# Align unmapped reads as sinle-end
+
+#Align unmapped reads as sinle-end
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
+)
 FINAL_FILES.extend(
    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
 )
@@ -103,12 +114,12 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_sorted.bam",sample=SAMPLES)
 # )
-# 
-# # Merge PE and SE reads
-# FINAL_FILES.extend(
-#   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
-# )
-# 
+
+# Merge PE and SE reads
+FINAL_FILES.extend(
+  expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+)
+
 # Sort merged PE and SE reads
 FINAL_FILES.extend(
   expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
@@ -118,10 +129,15 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
 # )
-# # Deduplicate PE+SE
-# FINAL_FILES.extend(
-#   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
-# )
+# Deduplicate PE+SE
+FINAL_FILES.extend(
+  expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
+)
+
+# Merge deduplicated reads
+FINAL_FILES.extend(
+  expand(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam",sample=SAMPLES)
+)
 
 
 # # Methylation call. files
@@ -142,13 +158,11 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.txt.bgz",sample=SAMPLES)
 # )
-
-# Unite methylation calling PE+SE
+# 
+# # Unite methylation calling PE+SE
 # FINAL_FILES.extend(
 #    [DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt.bgz"]
 # )
-
-
 
 # 
 # # Segmentation
@@ -161,9 +175,8 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #   expand(DIR_seg+"{sample}/per_chrom/{sample}_{chrom}_merged.deduped_meth_segments.bed", sample=SAMPLES, chrom=CHROMS_CANON)
 # )
-
 # FINAL_FILES.extend(
-#   expand(DIR_seg+"{sample}/{sample}.pe.se.deduped_meth_segments_gr.RDS", sample=SAMPLES)
+#   expand(os.path.join(DIR_seg,"{sample}/{sample}_merged.deduped_meth_segments.bed"), sample=SAMPLES)
 # )
 
 # 
@@ -186,16 +199,6 @@ FINAL_FILES.extend(
 # )
 
 
-# hg19_pe_L0-0.6_clipr1_10_3primer1_5_clip2_70_3primer2_5_gap1kb
-# align_unmapped2_se: 
-## MCCDLU, YYGAV6, KJ678J
-# hg38
-# merge_bam_pe_and_se: # " bug
-## AA49P6, L1PP31, 236L96, 5QCV6R, LJ8KVQ, KJ678J, A45S2Q, MCCDLU, EXP2C8, BZZHHV, GW3LEP, L3RXU9,
-# 9J2DTT, WYKWK3, FTMVW6, W2MXGZ, 2P3UF1
-
-
-
 rule target:
   input: FINAL_FILES
 
@@ -204,7 +207,33 @@ rule target:
 # Snakemake rules
 # ==========================================================================================
 
+# ==========================================================================================
+# Create a UCSC hub:
 
+# rule ucsc_hub:
+#   input:
+#     methylation
+#     diffmeth
+#     segmentation
+#   output:
+#     genomes = DIR_ucschub + 'genomes.txt',
+#     hub = DIR_ucschub + 'hub.txt',
+#     trackDB = DIR_ucschub + ASSEMBLY + 'trackDb.txt',
+#   params:
+#     genome_name = ASSEMBLY,
+#     paths       = DIR_ucschub,
+#   log:
+#     logfile = os.path.join(PATH_LOG, 'UCSC_HUB.log')
+#   message:"""
+#                 Running: UCSC_HUB:
+#                     output: {output.hub}
+#             """
+#   shell:
+#     "{tools}/Rscript {DIR_scripts}/Make_UCSC_HUB.R {input} {output}"
+#   
+#   
+  
+  
 # ==========================================================================================
 # Segmentation:
 #
@@ -281,9 +310,6 @@ rule sort_index_bam_mapped:
   shell:
     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
 
-
-# FTMVW6
-
 rule align_pe:
      input:
          refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
@@ -331,3 +357,9 @@ include: "./Rules/Prealign_rules.py"
 
 # Single-end
 include: "./Rules/Prealign_rules_SE.py"
+
+
+
+
+
+

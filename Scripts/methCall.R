@@ -55,9 +55,9 @@ argsL <- as.list(as.character(argsDF$V2))
 names(argsL) <- argsDF$V1
 
 ## catch output and messages into log file
-out <- file(argsL$logFile, open = "wt")
-sink(out,type = "output")
-sink(out, type = "message")
+#out <- file(argsL$logFile, open = "wt")
+#sink(out,type = "output")
+#sink(out, type = "message")
 
 
 # Run Functions -----------------------------------------------------------
@@ -76,8 +76,6 @@ minqual   <- as.numeric(argsL$minqual)
 save_folder <- argsL$save_folder
 save_db <- argsL$save_db
 
-saveRDS(argsL,"~/argsL.RDS")
-
 ### Extract Methylation Calls
 
 ## read bam file into methylKit object
@@ -90,6 +88,27 @@ methRawDB = processBismarkAln(location = input,
                             save.folder = save_folder,
                             save.db = TRUE
 )
+# 
+# #!/bin/bash
+# START=$(date +%s)
+# # do something
+# # start your script work here
+# /home/kwreczy/programs/R-3.5.0/bin/Rscript /fast/AG_Akalin/kwreczy/NB_BIH/methCall.R --inBam=/fast/AG_Akalin/kwreczy/NB_BIH/22X3H1_chr5_merged.dedup.sorted.bam --sample_id=22X3H1 --assembly=hg19 --mincov=10 --minqual=20 --save_folder=/fast/AG_Akalin/kwreczy/NB_BIH/ --save_db=True
+# 
+# # your logic ends here
+# END=$(date +%s)
+# DIFF=$(( $END - $START ))
+# echo "It took $DIFF seconds"
+
+
+#qsub -V -cwd -b y  -l h_vmem=10g -pe smp 16 -N methCall1 "/home/kwreczy/programs/R-3.5.0/bin/Rscript /fast/AG_Akalin/kwreczy/NB_BIH/methCall.R --inBam=/fast/AG_Akalin/kwreczy/NB_BIH/22X3H1_chr5_merged.dedup.sorted.bam --sample_id=22X3H1 --assembly=hg19 --mincov=10 --minqual=20 --save_folder=/fast/AG_Akalin/kwreczy/NB_BIH/ --save_db=True"
+
+# cat todownload_XXX.txt | xargs -I{} -n 1-P 20 scp kwreczy_m@med-login1.bihealth.org:{}. 
+
+
+
+
+
 
 
 

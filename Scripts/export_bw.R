@@ -58,6 +58,8 @@ G1$coverage = NULL
 G1$numCs    = NULL
 G1$numTs    = NULL
 
+print("Exporting")
+
 export.bw( object = G1, con=out_path  )
 
 

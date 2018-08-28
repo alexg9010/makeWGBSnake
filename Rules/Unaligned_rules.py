@@ -1,9 +1,28 @@
 
 
-
-
 # ==========================================================================================
 # Deduplication:
+
+
+rule merge_sort_index_dedup_perchr_pe_se:
+     input:
+         [DIR_deduped_picard+"{sample}/per_chrom/{sample}_"+chrom+"_merged.dedup.sorted.bam" for chrom in CHROMS_CANON]
+     output:
+         DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam"
+     params:
+         sort_args = config['args']['sambamba_sort'],
+         tmpdir=DIR_deduped_picard+"{sample}/",
+         unsorted_output=DIR_deduped_picard+"{sample}/{sample}_merged.dedup.bam"
+     log:
+         DIR_deduped_picard+"{sample}/{sample}_sort_merged.log"
+     threads: 5
+     shell:
+         """
+         {tools}/sambamba merge -t {threads} {params.unsorted_output} {input}
+         {tools}/sambamba sort {params.unsorted_output} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
+         """
+
+
 
 rule sort_index_dedup_perchr_pe_se:
      input:
@@ -118,8 +137,8 @@ rule align_unmapped2_se:
     message: "Mapping unmapped reads as single-end to genome."
     shell:
         """
-        {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
-        ln -f -s {output.outdir}{wildcards.sample}_2_val_2.fq.gz_unmapped_reads_2_bismark_bt2.bam {output.outfile}
+        #{tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
+        ln -f -s {output.outdir}{wildcards.sample}_unmapped_2_bismark_bt2.bam {output.outfile}
         """
 
 rule sort_index_bam_unmapped1_se:
@@ -160,12 +179,6 @@ rule align_unmapped1_se:
         {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
         ln -f -s {output.outdir}{wildcards.sample}_1_val_1.fq.gz_unmapped_reads_1_bismark_bt2.bam {output.outfile}
         """
-
-# # # gunzip < bigfile.gz | split --lines=1000000 - bigfile-split
-# zcat tmp.fq.gz | split --lines=1000000 - bigfile-split. --numeric-suffixes | xargs gzip
-# zcat tmp.fq.gz | split --lines=10000000 - bigfile-split. --numeric-suffixes  --filter='gzip > $FILE.gz' 
-#    
-
 
 
 

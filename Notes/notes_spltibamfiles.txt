@@ -1,0 +1,16 @@
+
+18.06.2018
+- add a rule to split fastq files after fastqc and then mapped then in parallel and merge them after mapping.
+Sth like this:
+ rule split:
+      input:
+          DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz"
+      output:
+          ....
+      params:
+          lines = 1000000
+      message:
+          "Splitting file {input} into {params.parts} parts."
+      shell:
+        "zcat tmp.fq.gz | split --lines=10000000 - bigfile-split. --numeric-suffixes  --filter='gzip > $FILE.gz'"          
+        

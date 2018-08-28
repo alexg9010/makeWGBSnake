@@ -167,6 +167,7 @@ rule methCall_CpG_perchr_pe_se:
      log:
          DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged.meth_calls.log"
      message: "Extract methylation calls from bam file."
+     threads: 2
      shell:
        """
           {tools}/Rscript {DIR_scripts}/methCall.R \

@@ -1,7 +1,0 @@
-{
-
-    "__default__" :
-    {
-    "name"      : "{rule}.{wildcards}"
-    }
-}

@@ -30,34 +30,25 @@ library("methylKit")
 
 input     <- args[1]#DIR_methcall+"{sample}/{sample}_filtered.txt.bgz"
 output    <- args[3]#argsL$outBed
-grFile    <- args[2]#argsL$grds
-pngFile   <- args[4]#argsL$png
-assembly <- args[5]#argsL$png
-sampleid <- args[6]#argsL$png
-logfile<- args[7]#argsL$png
-
-# a=list(input,
-# output,
-# grFile ,
-# pngFile,
-# assembly,
-# sampleid,
-# logfile)
-# print(a)
-# saveRDS(a, "~/params.RDS")
-
+grFile    <- args[2]
+pngFile   <- args[4]
+assembly <- args[5]
+sampleid <- args[6]
+joinneighbours <- args[7]
+initializeonsubset <- as.numeric(args[8])
+maxInt <- as.numeric(args[9])
+logfile<- args[10]
 
 ## catch output and messages into log file
-# out <- file(logfile, open = "wt")
-# sink(out,type = "output")
-# sink(out, type = "message")
+out <- file(logfile, open = "wt")
+sink(out,type = "output")
+sink(out, type = "message")
 
 ## read input file
 substrRight <- function(x, n){
   substr(x, nchar(x)-n+1, nchar(x))
 }
-
-if( substrRight(input, 8)==".txt.bgz" ){
+if( substrRight(input, 7)==".txt.bgz" ){
   # if input is a methylRawDB object
   
   ## read input methylRaw
@@ -94,7 +85,11 @@ if( length(methRaw.gr.per.chr.len.2.remove)>=1 ){
 }
 
 png(filename = pngFile,units = "in",width = 8,height = 4.5,res=300)
-res.gr = methSeg(methRaw.gr, diagnostic.plot=TRUE)
+res.gr = methSeg(methRaw.gr, 
+                 diagnostic.plot=TRUE, 
+                 join.neighbours=joinneighbours,
+                 initialize.on.subset=initializeonsubset,
+                 maxInt=maxInt)
 dev.off()
 
 ## Saving object
@@ -105,7 +100,7 @@ saveRDS(res.gr,file=grFile)
 
 ## export segments to bed file
 methSeg2bed(segments = res.gr,
-            trackLine = paste0("track name='",sampleid,"' ",
+            trackLine = paste0("track name='meth segments ' ",
                                "description='meth segments of ",
                                methRawDB@sample.id,
                                " mapped to ",

@@ -167,6 +167,7 @@ rule methCall_CpG_perchr:
                  --sample_id={params.sample_id} \
                  --logFile={log}
        """
+
 # ==========================================================================================
 # Deduplication:
 #
