@@ -4,8 +4,10 @@ output: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38/"
 genome: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/"
 tools: "/fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/"
 env: "./Envs/env.yaml"
-chromsfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.sizes"
-chromcanonicalfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg19/hg19.chrom.canon.sizes"
+# HERE was hg19, check IT !!!!!! [START]
+chromsfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.sizes"
+chromcanonicalfile: "/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.canon.sizes"
+# HERE was hg19, check IT !!!!!! [END]
 assembly: "hg38"
 args:
   fastqc: ''

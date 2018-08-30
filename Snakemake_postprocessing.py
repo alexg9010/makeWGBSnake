@@ -8,7 +8,68 @@
 import glob, os, re
 from snakemake.utils import R
 
+# ./per_chrom
+# ./22X3H1_unmapped_*.sam
+# ./*.fq.gz ###########
+# 22X3H1.bam
+# 22X3H1_1_val_1_bismark_bt2_pe.bam
+# 22X3H1_chr*_merged.bam
+# 22X3H1_merged.bam 
 
+# Chce zeby zostaly 
+# 22X3H1_sorted.bam
+# 22X3H1_sorted_merged.bam
+# 22X3H1_unmapped_2_bismark_bt2_SE_report.txt
+# 22X3H1_unmapped_1_bismark_bt2_SE_report.txt
+# 22X3H1_unmapped_1_bismark_bt2.bam
+# 22X3H1_unmapped_2_bismark_bt2.bam
+
+# for x in $(ls ./); do echo rm -r ./$x/$x_unmapped_*.sam ./$x/$x.bam ./$x/$x_merged.bam ./$x/$x_chr*_merged.bam ./$x/$x_1_val_1_bismark_bt2_pe.bam; done
+# for x in $(ls ./); do echo rm -r ./$x/$x_chr*_merged.bam; done
+
+#a='ZTFVN7'
+#cd $a
+#rm $a'_1_val_1_bismark_bt2_pe.bam'* $a'_merged.bam'* $a'_chr*_merged.bam' $a'_chr*_merged_sorted.bam'*
+#rm -r ./*log ./5QCV6R_unmapped_*.sam 5QCV6R_1_val_1_bismark_bt2_pe.bam* 5QCV6R_merged.bam* 5QCV6R_chr*_merged.bam 5QCV6R_chr*_merged_sorted.bam* ./per_chrom/
+
+#rm WYKWK3_merged.bam* WYKWK3_unmapped_1_bismark_bt2.bam WYKWK3_unmapped_2.bam WYKWK3_chr*_merged.bam *temp*  WYKWK3_chr*_merged_sorted.bam* *.log.err *.log
+
+# qsub /data/akalin/Projects/BIH_Neuroblastoma/Project/Scripts/merge_3_lanes.sh
+# /data/akalin/Projects/BIH_Neuroblastoma/Project/Data/Raw/AS-195434-LR-30888_R1.fastq.gz 
+# /data/akalin/Projects/BIH_Neuroblastoma/Project/Data/Raw/AS-195434-LR-30889_R1.fastq.gz
+# /data/akalin/Projects/BIH_Neuroblastoma/Project/Data/Raw/AS-195434-LR-30890_R1.fastq.gz 
+# /scratch/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Data/Raw_merged_lanes/22X3H1_1.fastq.gz
+
+#!/bin/bash
+#$ -pe smp 5 
+#$ -l h_vmem=5G
+
+# dir="/fast/users/kwreczy_m/scratch/Altuna_secret_project/raw_data/H26/"
+# cat $dir/H26_RDML00375_HMYFJCCXY_L8_1.fq.gz  $dir/H26_RDML00375_HNCVKCCXY_L8_1.fq.gz  $dir/H26_RDML00375_HT2FHCCXY_L8_1.fq.gz H26_RDML00375_HNCVKCCXY_L7_1.fq.gz  $dir/H26_RDML00375_HT2FHCCXY_L7_1.fq.gz > $dir/H26_1.fq.gz
+# cat $dir/H26_RDML00375_HMYFJCCXY_L8_2.fq.gz  $dir/H26_RDML00375_HNCVKCCXY_L8_2.fq.gz  $dir/H26_RDML00375_HT2FHCCXY_L8_2.fq.gz H26_RDML00375_HNCVKCCXY_L7_2.fq.gz  $dir/H26_RDML00375_HT2FHCCXY_L7_2.fq.gz > $dir/H26_2.fq.gz
+# 
+# dir="/fast/users/kwreczy_m/scratch/Altuna_secret_project/raw_data/H28/"
+# cat $dir/H28_RDML00377_HMYFJCCXY_L8_1.fq.gz  $dir/H28_RDML00377_HNCLHCCXY_L3_1.fq.gz  $dir/H28_RDML00377_HT2FHCCXY_L7_1.fq.gz $dir/H28_RDML00377_HNCLHCCXY_L2_1.fq.gz  $dir/H28_RDML00377_HNCLHCCXY_L4_1.fq.gz > $dir/H28_1.fq.gz
+# cat $dir/H28_RDML00377_HMYFJCCXY_L8_2.fq.gz  $dir/H28_RDML00377_HNCLHCCXY_L3_2.fq.gz  $dir/H28_RDML00377_HT2FHCCXY_L7_2.fq.gz $dir/H28_RDML00377_HNCLHCCXY_L2_2.fq.gz  $dir/H28_RDML00377_HNCLHCCXY_L4_2.fq.gz > $dir/H28_2.fq.gz
+
+
+#  snakemake -s ~/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 24  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_subset.json --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=15g -l h_rt=168:00:00 -pe smp 12 -N '{rule}_{wildcards.sample}'" 
+##########
+
+
+# deduplication
+# a='ZTFVN7'
+# cd $a
+# rm ./per_chrom/*.log* ./per_chrom/*.dedup.bam
+# rm $a'_dedup.bam' $a'_dedup.err' $a'_deduplication.log' $a'_deduplication.log.err' $a'_dedup.log'
+# cd ..
+
+#id="LJ8KVQ"
+#cd $id
+#rm $id'_'chr*_merged.bam $id'_1_val_1_bismark_bt2_pe.bam' $id'.bam' $id'_merged.bam' $id'_unmapped_2.sam' $id'_2_val_2.fq.gz_unmapped_reads_2_bismark_bt2.bam' $id'_1_val_1.fq.gz_unmapped_reads_1_bismark_bt2.bam' $id'_unmapped_2.bam' $id'_unmapped_1.bam' $id'_merged.bam' $id'_merged.bam.bai' $id'_merged_sort.log' $id'_merged_sort.log.err'
+#rm LJ8KVQ_chr*_merged.bam LJ8KVQ_chr*_merged_sorted.bam*
+#rm -r ./sambamba* ./per_chrom/
+#cd ..
 # ==========================================================================================
 # Input/output parameters
 # ==========================================================================================
@@ -77,20 +138,20 @@ DIR_ucschub = outputdir+"ucsc_hub/"
 FINAL_FILES = []
 
 
-# FASTQC
-FINAL_FILES.extend(
-  expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-)
-
-# Fastqc afater trimming
-FINAL_FILES.extend(
-   expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-)
-
-# Alignment
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
-)
+# # FASTQC
+# FINAL_FILES.extend(
+#   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+# )
+# 
+# # Fastqc afater trimming
+# FINAL_FILES.extend(
+#    expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+# )
+# 
+# # Alignment
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
+# )
 
 # # Split files per chromosome
 # FINAL_FILES.extend(
@@ -103,28 +164,28 @@ FINAL_FILES.extend(
 # )
 
 
-#Align unmapped reads as sinle-end
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
-)
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
-)
+# #Align unmapped reads as sinle-end
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
+# )
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+# )
 # ## Single-end
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_sorted.bam",sample=SAMPLES)
 # )
-
-# Merge PE and SE reads
-FINAL_FILES.extend(
-  expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
-)
-
-# Sort merged PE and SE reads
-FINAL_FILES.extend(
-  expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
-)
-
+#
+# # Merge PE and SE reads
+# FINAL_FILES.extend(
+#   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+# )
+#
+# # Sort merged PE and SE reads
+# FINAL_FILES.extend(
+#   expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
+# )
+#
 # # Deduplicate
 # FINAL_FILES.extend(
 #   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
@@ -134,12 +195,10 @@ FINAL_FILES.extend(
   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
 )
 
-# Merge deduplicated reads
-FINAL_FILES.extend(
-  expand(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam",sample=SAMPLES)
-)
-
-
+# # Merge deduplicated reads
+# FINAL_FILES.extend(
+#   expand(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam",sample=SAMPLES)
+# )
 # # Methylation call. files
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
@@ -148,7 +207,6 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
 # )
-
 # 
 # # Merge methylation calling
 # FINAL_FILES.extend(
@@ -270,7 +328,7 @@ rule split_bam_per_chr:
   input:
     DIR_mapped+"{sample}/{sample}_sorted.bam"
   output:
-    DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam"
+    temp(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam")
   params:
     sample = "{sample}",
     chrom = "{chrom}"
@@ -287,7 +345,7 @@ rule split_bam_per_chr:
     "{tools}/sambamba slice --output-filename={output} {input} {params.chrom}"
 
 # ==========================================================================================
-# Process unaligned reads
+# Process unaligned reads + deduplication
 
 # treat unaligned reads as single-end, map the into a genome and merge them to a bam
 # file with aligned reads
@@ -319,7 +377,7 @@ rule align_pe:
          #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
          #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
      output:
-         bam = DIR_mapped+"{sample}/{sample}.bam",
+         bam = temp(DIR_mapped+"{sample}/{sample}.bam"),
          report = DIR_mapped+"{sample}/{sample}_report.txt",
          un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
          un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz",
@@ -340,10 +398,10 @@ rule align_pe:
      run:
          commands = [
 	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',
-         'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
-         'ln -s '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
-         'ln -s '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
-         'ln -s '+output.odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
+         'mv '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
+         'mv '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
+         'mv '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
+         'mv '+output.odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
          ]
          for c in commands:
             shell(c)

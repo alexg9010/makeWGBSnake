@@ -3,6 +3,22 @@
 # ==========================================================================================
 # Deduplication:
 
+# GW3LEP deduplication repeat !!!!!!!!!!!!!!!!!!!!!!!!!!
+# -R dedup_picard_perchr_pe_se
+#snakemake -s ~/projects/makeWGBSnake/Snakemake_postprocessing.py  --keep-going -j 25  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=20g -l h_rt=168:00:00 -pe smp 9 -N 'hg38_{rule}'" 
+
+        # count   jobs
+        # 24      align_unmapped1_se
+        # 24      align_unmapped2_se
+        # 600     dedup_picard_perchr_pe_se
+        # 24      merge_bam_pe_and_se
+        # 24      merge_sort_index_dedup_perchr_pe_se
+        # 24      sort_index_bam_unmapped1_se
+        # 24      sort_index_bam_unmapped2_se
+        # 600     sort_index_dedup_perchr_pe_se
+        # 600     split_merged_pe_se
+        # 1       target
+
 
 rule merge_sort_index_dedup_perchr_pe_se:
      input:
@@ -22,8 +38,6 @@ rule merge_sort_index_dedup_perchr_pe_se:
          {tools}/sambamba sort {params.unsorted_output} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
          """
 
-
-
 rule sort_index_dedup_perchr_pe_se:
      input:
          DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.bam"
@@ -32,16 +46,14 @@ rule sort_index_dedup_perchr_pe_se:
      params:
          sort_args = config['args']['sambamba_sort'],
          tmpdir=DIR_deduped_picard+"{sample}/per_chrom/"
-     log:
-         DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_sort.log"
      shell:
-         "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
+         "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}"
 
 rule dedup_picard_perchr_pe_se:
      input:
          DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam"
      output:
-        outfile=DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.bam",
+        outfile=temp(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.bam"),
         metrics = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.deduplication.metrics.txt"
      params:
          picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
@@ -65,7 +77,7 @@ rule split_merged_pe_se:
   input:
     DIR_mapped+"{sample}/{sample}_sorted_merged.bam"
   output:
-    DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam"
+    temp(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam")
   params:
     chrom="{chrom}",
     outslice = DIR_mapped+"{sample}/{sample}_{chrom}_merged.bam",
@@ -86,7 +98,7 @@ rule merge_bam_pe_and_se:
     DIR_mapped+"{sample}/{sample}_unmapped_2_sorted.bam",
     DIR_mapped+"{sample}/{sample}_sorted.bam"
   output:
-    DIR_mapped+"{sample}/{sample}_sorted_merged.bam"
+    temp(DIR_mapped+"{sample}/{sample}_sorted_merged.bam")
   params:
     merged=DIR_mapped+"{sample}/{sample}_merged.bam",
     sort_args = config['args']['sambamba_sort'],
@@ -120,7 +132,7 @@ rule align_unmapped2_se:
     input:
         DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz"
     output:
-        outfile=DIR_mapped+"{sample}/{sample}_unmapped_2.bam",
+        outfile=temp(DIR_mapped+"{sample}/{sample}_unmapped_2.bam"),
         outdir=DIR_mapped+"{sample}/"
     params:
         bismark_args = config['args']['bismark_unmapped'],
@@ -137,8 +149,8 @@ rule align_unmapped2_se:
     message: "Mapping unmapped reads as single-end to genome."
     shell:
         """
-        #{tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
-        ln -f -s {output.outdir}{wildcards.sample}_unmapped_2_bismark_bt2.bam {output.outfile}
+        {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
+        mv {output.outdir}{wildcards.sample}_unmapped_2_bismark_bt2.bam {output.outfile}
         """
 
 rule sort_index_bam_unmapped1_se:
@@ -159,7 +171,7 @@ rule align_unmapped1_se:
     input:
         DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz"
     output:
-        outfile=DIR_mapped+"{sample}/{sample}_unmapped_1.bam",
+        outfile=temp(DIR_mapped+"{sample}/{sample}_unmapped_1.bam"),
         outdir=DIR_mapped+"{sample}/"
     params:
         bismark_args = config['args']['bismark_unmapped'],
@@ -177,7 +189,7 @@ rule align_unmapped1_se:
     shell:
         """
         {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
-        ln -f -s {output.outdir}{wildcards.sample}_1_val_1.fq.gz_unmapped_reads_1_bismark_bt2.bam {output.outfile}
+        mv {output.outdir}{wildcards.sample}_unmapped_1_bismark_bt2.bam {output.outfile}
         """
 
 

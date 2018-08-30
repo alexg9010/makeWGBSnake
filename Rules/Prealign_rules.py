@@ -44,7 +44,7 @@ rule trim_reads_pe:
 
 rule fastqc_raw_pe:
     input:
-       inputdir+"{sample}_{ext}.fastq.gz"
+       inputdir+"{sample}_{ext}.fq.gz"
     output:
         DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",
         DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.zip"
