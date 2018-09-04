@@ -3,23 +3,6 @@
 # ==========================================================================================
 # Deduplication:
 
-# GW3LEP deduplication repeat !!!!!!!!!!!!!!!!!!!!!!!!!!
-# -R dedup_picard_perchr_pe_se
-#snakemake -s ~/projects/makeWGBSnake/Snakemake_postprocessing.py  --keep-going -j 25  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=20g -l h_rt=168:00:00 -pe smp 9 -N 'hg38_{rule}'" 
-
-        # count   jobs
-        # 24      align_unmapped1_se
-        # 24      align_unmapped2_se
-        # 600     dedup_picard_perchr_pe_se
-        # 24      merge_bam_pe_and_se
-        # 24      merge_sort_index_dedup_perchr_pe_se
-        # 24      sort_index_bam_unmapped1_se
-        # 24      sort_index_bam_unmapped2_se
-        # 600     sort_index_dedup_perchr_pe_se
-        # 600     split_merged_pe_se
-        # 1       target
-
-
 rule merge_sort_index_dedup_perchr_pe_se:
      input:
          [DIR_deduped_picard+"{sample}/per_chrom/{sample}_"+chrom+"_merged.dedup.sorted.bam" for chrom in CHROMS_CANON]
@@ -36,6 +19,7 @@ rule merge_sort_index_dedup_perchr_pe_se:
          """
          {tools}/sambamba merge -t {threads} {params.unsorted_output} {input}
          {tools}/sambamba sort {params.unsorted_output} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
+         rm {params.unsorted_output}
          """
 
 rule sort_index_dedup_perchr_pe_se:
@@ -112,6 +96,44 @@ rule merge_bam_pe_and_se:
 
 # ==========================================================================================
 # Map unaliagned reads:
+
+## PBAT for R2
+
+### Paired-end
+rule sort_index_bam_unmapped2_se_pbat:
+  input:
+    DIR_mapped+"{sample}/{sample}_unmapped_2_pbat.bam"
+  output:
+    DIR_mapped+"{sample}/{sample}_unmapped_2_pbat_sorted.bam"
+  params:
+    sort_args = config['args']['sambamba_sort'],
+    tmpdir=DIR_mapped+"{sample}/"
+  shell:
+    "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}"
+
+
+rule align_unmapped2_se_pbat:
+    input:
+        DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz"
+    output:
+        outfile=temp(DIR_mapped+"{sample}/{sample}_unmapped_2_pbat.bam"),
+        outdir=DIR_mapped+"{sample}/"
+    params:
+        bismark_args = config['args']['bismark_unmapped'],
+        genomeFolder = "--genome_folder " + genomedir,
+        outdir = "--output_dir  "+DIR_mapped+"{sample}/",
+        pathToBowtie = "--path_to_bowtie " + config['tools'],
+        useBowtie2  = "--bowtie2 ",
+        samtools    = "--samtools_path "+ config['tools']+"samtools",
+        tmpdir     = "--temp_dir "+DIR_mapped+"{sample}/",
+        sort_args = config['args']['sambamba_sort']
+    message: "Mapping unmapped reads as single-end to genome."
+    shell:
+        """
+        ln -s {input} {DIR_mapped}{wildcards.sample}/{wildcards.sample}_unmapped_2_pbat.fq.gz
+        {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {DIR_mapped}{wildcards.sample}/{wildcards.sample}_unmapped_2_pbat.fq.gz
+        mv {output.outdir}{wildcards.sample}_unmapped_2_pbat_bismark_bt2.bam {output.outfile}
+        """
 
 ### Paired-end
 rule sort_index_bam_unmapped2_se:
