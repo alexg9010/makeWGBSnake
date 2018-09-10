@@ -15,6 +15,8 @@ rule merge_sort_index_dedup_perchr_pe_se:
      log:
          DIR_deduped_picard+"{sample}/{sample}_sort_merged.log"
      threads: 5
+     benchmark:
+          outputdir+"benchmarks/{sample}.merge_sort_index_dedup_perchr_pe_se.benchmark.txt"
      shell:
          """
          {tools}/sambamba merge -t {threads} {params.unsorted_output} {input}
@@ -30,6 +32,8 @@ rule sort_index_dedup_perchr_pe_se:
      params:
          sort_args = config['args']['sambamba_sort'],
          tmpdir=DIR_deduped_picard+"{sample}/per_chrom/"
+     benchmark:
+          outputdir+"benchmarks/{sample}.sort_index_dedup_perchr_pe_se.benchmark.txt"
      shell:
          "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}"
 
@@ -45,6 +49,8 @@ rule dedup_picard_perchr_pe_se:
          DIR_deduped_picard+"{sample}/per_chrom/{sample}_merged_deduplication.{chrom}.log"
      message:
           "Deduplicating paired-end aligned reads from {input}"
+     benchmark:
+          outputdir+"benchmarks/{sample}.dedup_picard_perchr_pe_se.benchmark.txt"
      shell:
           """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
           M={output.metrics} \
@@ -69,6 +75,8 @@ rule split_merged_pe_se:
     tmpdir=DIR_mapped+"{sample}/"
   log:
     DIR_mapped+"{sample}/{sample}_merged_sort.log"
+  benchmark:
+    outputdir+"benchmarks/{sample}.split_merged_pe_se.benchmark.txt"
   shell:
     """
     {tools}/sambamba slice --output-filename={params.outslice} {input} {params.chrom}
@@ -87,6 +95,8 @@ rule merge_bam_pe_and_se:
     merged=DIR_mapped+"{sample}/{sample}_merged.bam",
     sort_args = config['args']['sambamba_sort'],
     tmpdir=DIR_mapped+"{sample}"
+  benchmark:
+    outputdir+"benchmarks/{sample}.merge_bam_pe_and_se.benchmark.txt"
   shell:
     """
     {tools}/sambamba merge {params.merged} {input}
@@ -131,7 +141,7 @@ rule align_unmapped2_se_pbat:
     shell:
         """
         ln -s {input} {DIR_mapped}{wildcards.sample}/{wildcards.sample}_unmapped_2_pbat.fq.gz
-        {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {DIR_mapped}{wildcards.sample}/{wildcards.sample}_unmapped_2_pbat.fq.gz
+        {tools}/bismark {params.bismark_args} --pbat {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {DIR_mapped}{wildcards.sample}/{wildcards.sample}_unmapped_2_pbat.fq.gz
         mv {output.outdir}{wildcards.sample}_unmapped_2_pbat_bismark_bt2.bam {output.outfile}
         """
 
@@ -146,6 +156,8 @@ rule sort_index_bam_unmapped2_se:
     tmpdir=DIR_mapped+"{sample}/"
   log:
     DIR_mapped+"{sample}/{sample}_sort2.log"
+  benchmark:
+    outputdir+"benchmarks/{sample}.sort_index_bam_unmapped2_se.benchmark.txt"
   shell:
     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
 
@@ -169,6 +181,8 @@ rule align_unmapped2_se:
         align=DIR_mapped+"{sample}/{sample}_bismark_pe_mapping_unmapped_reads_2.log",
         sort=DIR_mapped+"{sample}/{sample}_bismark_pe_mapping_unmapped_reads_2_sort.log"
     message: "Mapping unmapped reads as single-end to genome."
+    benchmark:
+        outputdir+"benchmarks/{sample}.align_unmapped2_se.benchmark.txt"
     shell:
         """
         {tools}/bismark {params.bismark_args} {params.genomeFolder} {params.outdir} {params.pathToBowtie} {params.samtools} {params.tmpdir} {input} > {log.align} 2> {log.align}.err
@@ -185,6 +199,8 @@ rule sort_index_bam_unmapped1_se:
     tmpdir=DIR_mapped+"{sample}/"
   log:
     DIR_mapped+"{sample}/{sample}_sort1.log"
+  benchmark:
+    outputdir+"benchmarks/{sample}.sort_index_bam_unmapped1_se.benchmark.txt"
   shell:
     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
 
@@ -207,6 +223,8 @@ rule align_unmapped1_se:
     log:
         align=DIR_mapped+"{sample}/{sample}_bismark_pe_mapping_unmapped_reads_1.log",
         sort=DIR_mapped+"{sample}/{sample}_bismark_pe_mapping_unmapped_reads_1_sort.log"
+    benchmark:
+        outputdir+"benchmarks/{sample}.align_unmapped1_se.benchmark.txt"
     message: "Mapping unmapped reads as single-end to genome."
     shell:
         """
