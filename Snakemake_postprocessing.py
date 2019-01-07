@@ -18,7 +18,6 @@ outputdir = config["output"]
 genomedir = config["genome"]
 chromsfile = config["chromsfile"]
 chromcanonicalfile = config["chromcanonicalfile"]
-envs = config["env"]
 tools = config['tools']
 ARGS = config['args']
 
@@ -113,11 +112,11 @@ FINAL_FILES = []
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_sorted.bam",sample=SAMPLES)
 # )
-
-# Second mate in pbat mode
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_unmapped_2_pbat_sorted.bam",sample=SAMPLES)
-)
+# 
+# # Second mate in pbat mode
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_2_pbat_sorted.bam",sample=SAMPLES)
+# )
 #
 # # Merge PE and SE reads
 # FINAL_FILES.extend(
@@ -164,7 +163,6 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #    [DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt.bgz"]
 # )
-
 # 
 # # Segmentation
 # ##FINAL_FILES.extend(
@@ -283,6 +281,8 @@ rule split_bam_per_chr:
   #   chrom = m.group(0).split("_").pop()
   #   mycmd = "%s/sambamba slice --output-filename=%s %s %s > ~/log.txt" % (tools, output[0], input[0], chrom)
   #   shell(mycmd)
+  benchmark:
+    outputdir+"benchmarks/{sample}.split_bam_per_chr.benchmark.txt"
   shell: # it cab be propably done in parallel, but this is what works for now.
     #"for chrom in {CHROMS_CANON}; do {tools}/sambamba slice --output-filename={DIR_mapped}{params.sample}/per_chrom/{params.sample}'_'$chrom'.bam' {DIR_mapped}{params.sample}/{params.sample}_sorted.bam $chrom ; done"
     "{tools}/sambamba slice --output-filename={output} {input} {params.chrom}"
@@ -308,6 +308,8 @@ rule sort_index_bam_mapped:
     tmpdir=DIR_mapped+"{sample}/"
   log:
     DIR_mapped+"{sample}/{sample}_sort.log"
+  benchmark:
+    outputdir+"benchmarks/{sample}.sort_index_bam_mapped.benchmark.txt"
   shell:
     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
 
@@ -338,6 +340,8 @@ rule align_pe:
      log:
          DIR_mapped+"{sample}/{sample}_bismark_pe_mapping.log"
      message: "Mapping paired-end reads to genome."
+     benchmark:
+        outputdir+"benchmarks/{sample}.align_pe.benchmark.txt"
      run:
          commands = [
 	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',

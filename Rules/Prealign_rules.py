@@ -17,6 +17,8 @@ rule fastqc_after_trimming_pe:
     	   DIR_posttrim_QC+"{sample}/{sample}_trimmed_fastqc.log"
      message:
          "Quality checking trimmmed paired-end data from {input}"
+     benchmark:
+        outputdir+"benchmarks/{sample}.fastqc_after_trimming_pe.benchmark.txt"
      shell:
          "{tools}/fastqc {params} {input} > {log} 2> {log}.err"
 
@@ -38,6 +40,8 @@ rule trim_reads_pe:
          DIR_trimmed+"{sample}/{sample}.log"
      message:
          "Trimming raw paired-end read data from {input}"
+     benchmark:
+        outputdir+"benchmarks/{sample}.trim_reads_pe.benchmark.txt"
      shell:
        "{tools}/trim_galore {params} {input.files} > {log} 2> {log}.err"
 
@@ -53,6 +57,8 @@ rule fastqc_raw_pe:
        outdir = "--outdir "+ DIR_rawqc +"{sample}/"
     log:
         DIR_rawqc+"{sample}/{sample}_{ext}.log"
+    benchmark:
+        outputdir+"benchmarks/{sample}.fastqc_raw_pe.benchmark.txt"
     shell:
         "{tools}/fastqc {params} {input} > {log} 2> {log}.err"
        

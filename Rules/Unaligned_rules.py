@@ -121,7 +121,6 @@ rule sort_index_bam_unmapped2_se_pbat:
   shell:
     "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}"
 
-
 rule align_unmapped2_se_pbat:
     input:
         DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz"

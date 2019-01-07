@@ -11,6 +11,8 @@ rule merge_united_methcalls_pe_se_destrandT:
      params:
          cores=20,
          outfile = DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dT.txt"
+     benchmark:
+         outputdir+"benchmarks/sth.merge_united_methcalls_pe_se_destrandT.benchmark.txt"
      shell:
        """
        {tools}/Rscript {DIR_scripts}/Merge_united_methcalls.R "{input}" {params.outfile} {params.cores}
@@ -24,6 +26,8 @@ rule merge_united_methcalls_pe_se_destrandF:
      params:
          cores=20,
          outfile = DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt"
+     benchmark:
+         outputdir+"benchmarks/sth.merge_united_methcalls_pe_se_destrandF.benchmark.txt"
      shell:
        """
        {tools}/Rscript {DIR_scripts}/Merge_united_methcalls.R "{input}" {params.outfile} {params.cores}
@@ -48,6 +52,8 @@ rule unite_meth_calls_perchr_pe_se:
          suffixT = "merged_cpg_dT_{chrom}",
          suffixF = "merged_cpg_dF_{chrom}",
      log: DIR_methcall+"methylBase_per_chrom/meth_merged_unite_cpg.log"
+     benchmark:
+         outputdir+"benchmarks/sth.{chrom}_unite_meth_calls_perchr_pe_se.benchmark.txt"
      shell:
        """
          {tools}/Rscript {DIR_scripts}/Unite_meth.R \
@@ -78,6 +84,8 @@ rule merge_filtered_methcall_pe_se:
        cores = 4,
        rdsfile = DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.RDS",
        tabixfile=DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.txt"
+     benchmark:
+         outputdir+"benchmarks/{sample}.merge_filtered_methcall_pe_se.benchmark.txt"
      run:
         R("""
      
@@ -135,6 +143,8 @@ rule filter_and_canon_chroms_perchr_pe_se:
      log:
          DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged.meth_calls_filter.log"
      message: ""
+     benchmark:
+         outputdir+"benchmarks/{sample}.{chrom}_filter_and_canon_chroms_perchr_pe_se.benchmark.txt"
      shell:
        """
          {tools}/Rscript {DIR_scripts}/Filter_meth.R \
@@ -167,6 +177,8 @@ rule methCall_CpG_perchr_pe_se:
      log:
          DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged.meth_calls.log"
      message: "Extract methylation calls from bam file."
+     benchmark:
+         outputdir+"benchmarks/{sample}.{chrom}_methCall_CpG_perchr_pe_se.benchmark.txt"
      threads: 2
      shell:
        """
@@ -181,3 +193,13 @@ rule methCall_CpG_perchr_pe_se:
                  --sample_id={params.sample_id} \
                  --logFile={log}
        """
+
+          # /fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin//Rscript /fast/users/kwreczy_m/projects/makeWGBSnake/Scripts//methCall.R                  --inBam=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/05_deduplication/Sampled_236L96/per_chrom/Sampled_236L96_chr1_merged.dedup.sorted.bam                  --assembly=hg19 \
+          #      --mincov=10                  --minqual=20                  --context=CpG                  --save_db=True \
+          #  --save_folder=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/Sampled_236L96/per_chrom/             \
+          #  --sample_id=Sampled_236L96_chr1_merged                  --logFile=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/Sampled_236L96/per_chrom/Sampled_236L96_chr1_merged.meth_calls.log
+          # 
+          # 
+          # 
+
+
