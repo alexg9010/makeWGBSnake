@@ -24,7 +24,7 @@ ARGS = config['args']
 try:
     SAMPLES = config["samples"]
 except KeyError:
-    SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
+    SAMPLES = [re.sub('\\_R1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_R1.fq.gz")]
 
 try:
   TREATMENT = config['treatment']

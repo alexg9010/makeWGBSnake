@@ -1,0 +1,34 @@
+---
+input: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw_random10Mlanespe/DKFZIDS/"
+output: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_lane/"
+genome: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/"
+tools: "/fast_new/work/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/"
+# HERE was hg19, check IT !!!!!! [START]
+chromsfile: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.sizes"
+chromcanonicalfile: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.canon.sizes"
+# HERE was hg19, check IT !!!!!! [END]
+assembly: "hg38"
+args:
+  fastqc: ''
+  trim_galore: " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  "
+  bismark: " --ambig_bam  --unmapped --ambiguous   "
+  bismark_unmapped: "   "
+  methCall: ''
+  MINCOV: "10"
+  MINQUAL: "20"
+  multiQC: ''
+  bismark_genome_preparation: ''
+  sambamba_sort: " --memory-limit=30G --tmpdir=/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_lane//temp/ -t 1"
+  picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=35000 "
+samples:
+treatment:
+treatment2:
+
+# Here is info how I ran it: 
+#snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 24  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds
+
+
+
+
+
+
