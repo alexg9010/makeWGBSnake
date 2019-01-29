@@ -1,0 +1,13 @@
+# This file may be used to create an environment using:
+# $ conda create --name wgbs_env --file <this file> 
+## make sure to have the following conda channels in ~/.condarc file
+# https://bioconda.github.io/#set-up-channels
+## install R with conda 
+# https://conda.io/docs/user-guide/tasks/use-r-with-conda.html#using-r-with-conda
+channels:
+  - bioconda
+  - r
+dependencies:
+ - r=3.4.2
+ - bioconductor-genomation
+ - bioconductor-methylkit
