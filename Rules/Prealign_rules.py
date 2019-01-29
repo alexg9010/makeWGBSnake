@@ -27,7 +27,7 @@ rule trim_reads_pe:
          files = [ inputdir+"{sample}_1.fq.gz",
                    inputdir+"{sample}_2.fq.gz"]
      output:
-         DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz", 
+         DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
          DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
      params:
          extra          = config['args']['trim_galore'],
@@ -57,8 +57,8 @@ rule fastqc_raw_pe:
        outdir = "--outdir "+ DIR_rawqc +"{sample}/"
     log:
         DIR_rawqc+"{sample}/{sample}_{ext}.log"
-    benchmark:
-        outputdir+"benchmarks/{sample}.fastqc_raw_pe.benchmark.txt"
+    #benchmark:
+    #    outputdir+"benchmarks/{sample}.fastqc_raw_pe.benchmark.txt"
     shell:
         "{tools}/fastqc {params} {input} > {log} 2> {log}.err"
        

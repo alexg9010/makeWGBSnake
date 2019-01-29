@@ -24,7 +24,11 @@ ARGS = config['args']
 try:
     SAMPLES = config["samples"]
 except KeyError:
-    SAMPLES = [re.sub('\\_R1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_R1.fq.gz")]
+    SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
+
+# for the case when sample name has "." it won't work, so I replaces "." with "AA"
+SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")][:2]
+print(SAMPLES)
 
 try:
   TREATMENT = config['treatment']
@@ -75,20 +79,26 @@ DIR_ucschub = outputdir+"ucsc_hub/"
 FINAL_FILES = []
 
 
-# # FASTQC
-# FINAL_FILES.extend(
-#   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-# )
+# FASTQC
+FINAL_FILES.extend(
+  expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+)
+
+# Fastqc afater trimming
+FINAL_FILES.extend(
+   expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+)
 # 
-# # Fastqc afater trimming
-# FINAL_FILES.extend(
-#    expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-# )
-# 
-# # Alignment
+# Alignment
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 # )
+###################################### TEMP
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_1_val_1_bismark_bt2_pe.bam",sample=SAMPLES)
+# )
+
+
 
 # # Split files per chromosome
 # FINAL_FILES.extend(
@@ -198,6 +208,8 @@ FINAL_FILES = []
 # )
 
 
+print(FINAL_FILES)
+
 rule target:
   input: FINAL_FILES
 
@@ -233,71 +245,71 @@ rule target:
 #   
   
   
-# ==========================================================================================
-# Segmentation:
-#
-# rules for PE and SE+PE
-#include: "./Rules/Segmentation_rules.py"
-include: "./Rules/Segmentation_merged_rules.py"
-
-# ==========================================================================================
-# Differential methylation in a pairwise manner
-#
-# rules for PE and SE+PE
-include: "./Rules/DMC_pairwise.py"
-
-
-# ==========================================================================================
-# Export a bigwig file:
-#
-# rules for PE and SE+PE
-include: "./Rules/Export_BW.py"
-
-       
-# ==========================================================================================
-# Methylation calling:
+# # ==========================================================================================
+# # Segmentation:
+# #
+# # rules for PE and SE+PE
+# #include: "./Rules/Segmentation_rules.py"
+# include: "./Rules/Segmentation_merged_rules.py"
 # 
-# rules for PE and SE+PE
-#include: "./Rules/Meth_preprocessing_rules.py"
-include: "./Rules/Meth_preprocessing_merged_rules.py"
-
-
-# ==========================================================================================
-# Split bam file per chromosome:
-
-rule split_bam_per_chr:
-  input:
-    DIR_mapped+"{sample}/{sample}_sorted.bam"
-  output:
-    temp(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam")
-  params:
-    sample = "{sample}",
-    chrom = "{chrom}"
-  log:
-    DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.log"
-  # run: # this way I get "Waiting for output files 5 secs" and I can't get rid of it
-  #   import re, os
-  #   m = re.search('(?<=_)(.*)(?=.bam)', os.path.basename(output[0]))
-  #   chrom = m.group(0).split("_").pop()
-  #   mycmd = "%s/sambamba slice --output-filename=%s %s %s > ~/log.txt" % (tools, output[0], input[0], chrom)
-  #   shell(mycmd)
-  benchmark:
-    outputdir+"benchmarks/{sample}.split_bam_per_chr.benchmark.txt"
-  shell: # it cab be propably done in parallel, but this is what works for now.
-    #"for chrom in {CHROMS_CANON}; do {tools}/sambamba slice --output-filename={DIR_mapped}{params.sample}/per_chrom/{params.sample}'_'$chrom'.bam' {DIR_mapped}{params.sample}/{params.sample}_sorted.bam $chrom ; done"
-    "{tools}/sambamba slice --output-filename={output} {input} {params.chrom}"
-
-# ==========================================================================================
-# Process unaligned reads + deduplication
-
-# treat unaligned reads as single-end, map the into a genome and merge them to a bam
-# file with aligned reads
-include: "./Rules/Unaligned_rules.py"
-
-
-# ==========================================================================================
-# Mapping:
-
+# # ==========================================================================================
+# # Differential methylation in a pairwise manner
+# #
+# # rules for PE and SE+PE
+# include: "./Rules/DMC_pairwise.py"
+# 
+# 
+# # ==========================================================================================
+# # Export a bigwig file:
+# #
+# # rules for PE and SE+PE
+# include: "./Rules/Export_BW.py"
+# 
+#        
+# # ==========================================================================================
+# # Methylation calling:
+# # 
+# # rules for PE and SE+PE
+# #include: "./Rules/Meth_preprocessing_rules.py"
+# include: "./Rules/Meth_preprocessing_merged_rules.py"
+# 
+# 
+# # ==========================================================================================
+# # Split bam file per chromosome:
+# 
+# rule split_bam_per_chr:
+#   input:
+#     DIR_mapped+"{sample}/{sample}_sorted.bam"
+#   output:
+#     temp(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam")
+#   params:
+#     sample = "{sample}",
+#     chrom = "{chrom}"
+#   log:
+#     DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.log"
+#   # run: # this way I get "Waiting for output files 5 secs" and I can't get rid of it
+#   #   import re, os
+#   #   m = re.search('(?<=_)(.*)(?=.bam)', os.path.basename(output[0]))
+#   #   chrom = m.group(0).split("_").pop()
+#   #   mycmd = "%s/sambamba slice --output-filename=%s %s %s > ~/log.txt" % (tools, output[0], input[0], chrom)
+#   #   shell(mycmd)
+#   benchmark:
+#     outputdir+"benchmarks/{sample}.split_bam_per_chr.benchmark.txt"
+#   shell: # it cab be propably done in parallel, but this is what works for now.
+#     #"for chrom in {CHROMS_CANON}; do {tools}/sambamba slice --output-filename={DIR_mapped}{params.sample}/per_chrom/{params.sample}'_'$chrom'.bam' {DIR_mapped}{params.sample}/{params.sample}_sorted.bam $chrom ; done"
+#     "{tools}/sambamba slice --output-filename={output} {input} {params.chrom}"
+# 
+# # ==========================================================================================
+# # Process unaligned reads + deduplication
+# 
+# # treat unaligned reads as single-end, map the into a genome and merge them to a bam
+# # file with aligned reads
+# include: "./Rules/Unaligned_rules.py"
+# 
+# 
+# # ==========================================================================================
+# # Mapping:
+# 
 rule sort_index_bam_mapped:
   input:
     DIR_mapped+"{sample}/{sample}.bam"
@@ -322,11 +334,12 @@ rule align_pe:
          #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
          #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
      output:
-         bam = temp(DIR_mapped+"{sample}/{sample}.bam"),
+         #DIR_mapped+"{sample}/{sample}_1_val_1_bismark_bt2_pe.bam"
+         bam = DIR_mapped+"{sample}/{sample}.bam",
          report = DIR_mapped+"{sample}/{sample}_bismark_bt2_PE_report.txt",
          un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
-         un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz",
-         odir = DIR_mapped+"{sample}/"
+         un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz"
+         #odir = DIR_mapped+"{sample}/"
      params:
         # Bismark parameters
          bismark_args = config['args']['bismark'],
@@ -343,25 +356,27 @@ rule align_pe:
      benchmark:
         outputdir+"benchmarks/{sample}.align_pe.benchmark.txt"
      run:
+         sample_name = os.path.basename(input.fin1[:-14])
+         output_odir = DIR_mapped+sample_name+"/"
          commands = [
-	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err',
-         'mv '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_pe.bam {output.bam}',
-         'mv '+output.odir+os.path.basename(input.fin1[:-6])+'_bismark_bt2_PE_report.txt {output.report}',
-         'mv '+output.odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
-         'mv '+output.odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
+	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err'
+         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_pe.bam {output.bam}',
+         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_PE_report.txt {output.report}',
+         'mv '+output_odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
+         'mv '+output_odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
          ]
          for c in commands:
-            shell(c)
-            
-      
+           shell(c)
+
+
 # ==========================================================================================
 # Pre-mapping rules:
 
 # Paired-end
 include: "./Rules/Prealign_rules.py"
 
-# Single-end
-include: "./Rules/Prealign_rules_SE.py"
+# # Single-end
+# include: "./Rules/Prealign_rules_SE.py"
 
 
 

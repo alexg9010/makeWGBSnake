@@ -1,8 +1,8 @@
 ---
-input: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw_random10Mlanespe/DKFZIDS/"
-output: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_lane/"
+input: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw/Renamed/"
+output: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/"
 genome: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/"
-tools: "/fast_new/work/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin/"
+tools: "/fast/users/kwreczy_m/work/conda-prefix/envs/bsseqpipe/bin/"
 # HERE was hg19, check IT !!!!!! [START]
 chromsfile: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.sizes"
 chromcanonicalfile: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.canon.sizes"
@@ -10,8 +10,8 @@ chromcanonicalfile: "/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Bas
 assembly: "hg38"
 args:
   fastqc: ''
-  trim_galore: " --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5  "
-  bismark: " --ambig_bam  --unmapped --ambiguous   "
+  trim_galore: "  --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5   "
+  bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 6 -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --upto 100000 "
   bismark_unmapped: "   "
   methCall: ''
   MINCOV: "10"
@@ -20,13 +20,12 @@ args:
   bismark_genome_preparation: ''
   sambamba_sort: " --memory-limit=30G --tmpdir=/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_lane//temp/ -t 1"
   picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=35000 "
-samples:
-treatment:
-treatment2:
+samples: ''
+treatment: ''
+treatment2: ''
 
 # Here is info how I ran it: 
-#snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 24  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds
-
+#snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds
 
 
 
