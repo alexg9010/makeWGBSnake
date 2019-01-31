@@ -27,8 +27,8 @@ except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
 ########################### TODO [START]
-SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")][:10]
-#SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
+SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["YYGAV6-RUNID-0142-FLOWCELL-AHF3YTCCXY-LANE-5"]
 # SAMPLES =["L1PP31-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-7",
 # "QMQHSB-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-1",
@@ -103,10 +103,10 @@ FINAL_FILES = []
 # )#
 
 
-# # # Create genome bisulfite index
-# FINAL_FILES.extend(
-#    expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
-# ) 
+# # Create genome bisulfite index
+FINAL_FILES.extend(
+   expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
+)
 
 # # # Subset reads
 # FINAL_FILES.extend(
@@ -115,10 +115,10 @@ FINAL_FILES = []
 
 
 # 
-# Alignment
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}.bam",sample=SAMPLES)
-)
+# # Alignment
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}.bam",sample=SAMPLES)
+# )
 # # Sorting
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
@@ -395,23 +395,23 @@ rule align_pe:
 # # Generate methyl-converted version of the reference genome:
 #            
 
-# rule bismark_genome_preparation:
-#     input:
-#         ancient(genomedir)
-#     output:
-#         genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
-#         genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"
-#     params:
-#         pathToBowtie = "--path_to_bowtie "+ tools,
-#         useBowtie2   = "--bowtie2 ",
-#         verbose      = "--verbose "
-#     log:
-#         genomedir+'bismark_genome_preparation_'+ASSEMBLY+'.log'
-#     message: "Converting {ASSEMBLY} Genome into Bisulfite analogue"
-#     shell:
-#         "bismark_genome_preparation {params} {input} > {log} 2> {log}.err"         
-#  
- 
+rule bismark_genome_preparation:
+    input:
+        ancient(genomedir)
+    output:
+        genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
+        genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"
+    params:
+        pathToBowtie = "--path_to_bowtie "+ tools,
+        useBowtie2   = "--bowtie2 ",
+        verbose      = "--verbose "
+    log:
+        genomedir+'bismark_genome_preparation_'+ASSEMBLY+'.log'
+    message: "Converting {ASSEMBLY} Genome into Bisulfite analogue"
+    shell:
+        "bismark_genome_preparation {params} {input} > {log} 2> {log}.err"
+
+
            
 # ==========================================================================================
 # Subset reads:           
