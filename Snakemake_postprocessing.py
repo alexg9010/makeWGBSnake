@@ -26,9 +26,20 @@ try:
 except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
-# for the case when sample name has "." it won't work, so I replaces "." with "AA"
-SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")][:2]
-print(SAMPLES)
+########################### TODO [START]
+SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")][:10]
+#SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+#SAMPLES =["YYGAV6-RUNID-0142-FLOWCELL-AHF3YTCCXY-LANE-5"]
+# SAMPLES =["L1PP31-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-7",
+# "QMQHSB-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-1",
+# "KJ678J-RUNID-0160-FLOWCELL-BHF2FHCCXY-LANE-4",
+# "YYGAV6-RUNID-0142-FLOWCELL-AHF3YTCCXY-LANE-5",
+# "KJ678J-RUNID-0160-FLOWCELL-BHF2FHCCXY-LANE-5",
+# "BZZHHV-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-2",
+# "A45S2Q-RUNID-0129-FLOWCELL-BHFCTJCCXY-LANE-8",
+# "GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+##########################  TODO [END]
+
 
 try:
   TREATMENT = config['treatment']
@@ -69,6 +80,9 @@ DIR_ucsc_hub = outputdir+"09_ucsc_hub/"
 DIR_multiqc = outputdir+"multiqc/"
 DIR_ucschub = outputdir+"ucsc_hub/"
 
+########################### TODO [START]
+DIR_trimmed_subset=outputdir+'subset_reads/'
+########################### TODO [END]
 
 # ==========================================================================================
 # Output files
@@ -78,46 +92,52 @@ DIR_ucschub = outputdir+"ucsc_hub/"
 # Construct all the files we're eventually expecting to have.
 FINAL_FILES = []
 
+# # FASTQC
+# FINAL_FILES.extend(
+#   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+# )
+# 
+# # Fastqc afater trimming
+# FINAL_FILES.extend(
+#    expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
+# )#
 
-# FASTQC
-FINAL_FILES.extend(
-  expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-)
 
-# Fastqc afater trimming
-FINAL_FILES.extend(
-   expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
-)
+# # # Create genome bisulfite index
+# FINAL_FILES.extend(
+#    expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
+# ) 
+
+# # # Subset reads
+# FINAL_FILES.extend(
+#    expand(DIR_trimmed_subset+"{sample}/{sample}_{ext}_val_{ext}.fq.gz", sample=SAMPLES, ext=["1", "2"])
+# )
+
+
 # 
 # Alignment
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
-# )
-###################################### TEMP
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_1_val_1_bismark_bt2_pe.bam",sample=SAMPLES)
-# )
-
-
-
-# # Split files per chromosome
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam", sample=SAMPLES, chrom=CHROMS_CANON)
-# )
-# 
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}.bam",sample=SAMPLES)
+)
 # # Sorting
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
 # )
 
+# # Split files per chromosome
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/per_chrom/{sample}_{chrom}.bam", sample=SAMPLES, chrom=CHROMS_CANON)
+# )
 
-# #Align unmapped reads as sinle-end
+
+# # Align unmapped reads as sinle-end
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
 # )
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
 # )
+
 # ## Single-end
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_sorted.bam",sample=SAMPLES)
@@ -329,12 +349,13 @@ rule align_pe:
      input:
          refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
          refconvert_GA = genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
-         fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
-         fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
+         # fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+         # fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
+         fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
+         fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
          #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
          #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
      output:
-         #DIR_mapped+"{sample}/{sample}_1_val_1_bismark_bt2_pe.bam"
          bam = DIR_mapped+"{sample}/{sample}.bam",
          report = DIR_mapped+"{sample}/{sample}_bismark_bt2_PE_report.txt",
          un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
@@ -359,14 +380,69 @@ rule align_pe:
          sample_name = os.path.basename(input.fin1[:-14])
          output_odir = DIR_mapped+sample_name+"/"
          commands = [
-	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err'
-         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_pe.bam {output.bam}',
-         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_PE_report.txt {output.report}',
-         'mv '+output_odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1}',
-         'mv '+output_odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2}'
+	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err;',
+         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_pe.bam {output.bam};',
+         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_PE_report.txt {output.report};',
+         'mv '+output_odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1};',
+         'mv '+output_odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2};'
          ]
          for c in commands:
            shell(c)
+
+      
+# 
+# # ==========================================================================================
+# # Generate methyl-converted version of the reference genome:
+#            
+
+# rule bismark_genome_preparation:
+#     input:
+#         ancient(genomedir)
+#     output:
+#         genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
+#         genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"
+#     params:
+#         pathToBowtie = "--path_to_bowtie "+ tools,
+#         useBowtie2   = "--bowtie2 ",
+#         verbose      = "--verbose "
+#     log:
+#         genomedir+'bismark_genome_preparation_'+ASSEMBLY+'.log'
+#     message: "Converting {ASSEMBLY} Genome into Bisulfite analogue"
+#     shell:
+#         "bismark_genome_preparation {params} {input} > {log} 2> {log}.err"         
+#  
+ 
+           
+# ==========================================================================================
+# Subset reads:           
+# indir="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/02_trimming/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/"
+# f1=$indir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_1_val_1.fq.gz
+# f2=$indir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_2_val_2.fq.gz
+# 
+# outdir="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/subset_reads/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/"
+# o1=$outdir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_1_val_1.fq.gz
+# o2=$outdir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_2_val_2.fq.gz
+# 
+# 
+# reformat.sh reads=100000 sampleseed=1564 in=$f1 in2=$f2 out=$o1 out2=$o2 overwrite=true 2> $outdir/err.txt
+
+
+rule subset_reads_pe:
+    input:
+      i1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+      i2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
+    output:
+      o1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
+      o2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
+    params:
+        reads = " reads=100000 ",
+        sampleseed=" sampleseed=1564 "
+    log:
+        DIR_trimmed_subset+'{sample}/reformat_{sample}.log'
+    message: "Subset reads with reformat.sh"
+    shell:
+        "reformat.sh {params} in={input.i1} in2={input.i2} out={output.o1} out2={output.o2} overwrite=true 2> {log}.err"  
+
 
 
 # ==========================================================================================
