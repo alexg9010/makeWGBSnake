@@ -28,7 +28,7 @@ except KeyError:
 
 ########################### TODO [START]
 SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
-SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+#SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["YYGAV6-RUNID-0142-FLOWCELL-AHF3YTCCXY-LANE-5"]
 # SAMPLES =["L1PP31-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-7",
 # "QMQHSB-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-1",
@@ -425,7 +425,6 @@ rule bismark_genome_preparation:
 # 
 # 
 # reformat.sh reads=100000 sampleseed=1564 in=$f1 in2=$f2 out=$o1 out2=$o2 overwrite=true 2> $outdir/err.txt
-
 
 rule subset_reads_pe:
     input:

@@ -46,6 +46,7 @@ rule trim_reads_pe:
        "{tools}/trim_galore {params} {input.files} > {log} 2> {log}.err"
 
 
+
 rule fastqc_raw_pe:
     input:
        inputdir+"{sample}_{ext}.fq.gz"
