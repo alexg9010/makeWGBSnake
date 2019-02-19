@@ -15,7 +15,8 @@ from snakemake.utils import R
 # Load params from a config file
 inputdir = config["input"]
 outputdir = config["output"]
-genomedir = config["genome"]
+genomedir = os.path.dirname(config["genome"])+"/"
+genomefile =config["genome"]
 chromsfile = config["chromsfile"]
 chromcanonicalfile = config["chromcanonicalfile"]
 tools = config['tools']
@@ -29,17 +30,10 @@ except KeyError:
 ########################### TODO [START]
 SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
-#SAMPLES =["YYGAV6-RUNID-0142-FLOWCELL-AHF3YTCCXY-LANE-5"]
-# SAMPLES =["L1PP31-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-7",
-# "QMQHSB-RUNID-0163-FLOWCELL-AHFMF5CCXY-LANE-1",
-# "KJ678J-RUNID-0160-FLOWCELL-BHF2FHCCXY-LANE-4",
-# "YYGAV6-RUNID-0142-FLOWCELL-AHF3YTCCXY-LANE-5",
-# "KJ678J-RUNID-0160-FLOWCELL-BHF2FHCCXY-LANE-5",
-# "BZZHHV-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-2",
-# "A45S2Q-RUNID-0129-FLOWCELL-BHFCTJCCXY-LANE-8",
-# "GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+#SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
 
+# snakemake -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 5  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds
 
 try:
   TREATMENT = config['treatment']
@@ -69,7 +63,7 @@ DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
-DIR_mapped      = outputdir+'04_mapping/'
+DIR_mapped      = outputdir+'04_mapping_bwameth/'
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 DIR_trimmed     = outputdir+'02_trimming/'
 DIR_rawqc       = outputdir+'01_raw_QC/'
@@ -82,6 +76,7 @@ DIR_ucschub = outputdir+"ucsc_hub/"
 
 ########################### TODO [START]
 DIR_trimmed_subset=outputdir+'subset_reads/'
+DIR_mapped_bwameth      = outputdir+'04_mapping_bwameth/'
 ########################### TODO [END]
 
 # ==========================================================================================
@@ -103,22 +98,35 @@ FINAL_FILES = []
 # )#
 
 
-# # Create genome bisulfite index
+# # # Create genome bisulfite index
+# FINAL_FILES.extend(
+#    expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
+# )
+
+# # # Create genome bisulfite index
+# FINAL_FILES.extend(
+#    expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
+# )
+
 FINAL_FILES.extend(
-   expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
+    expand(DIR_mapped+"{sample}/{sample}.flagstat.txt",sample=SAMPLES)
 )
+
 
 # # # Subset reads
 # FINAL_FILES.extend(
 #    expand(DIR_trimmed_subset+"{sample}/{sample}_{ext}_val_{ext}.fq.gz", sample=SAMPLES, ext=["1", "2"])
 # )
-
-
 # 
+# #
 # # Alignment
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}.bam",sample=SAMPLES)
 # )
+
 # # Sorting
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_sorted.bam",sample=SAMPLES)
@@ -319,113 +327,20 @@ rule target:
 #     #"for chrom in {CHROMS_CANON}; do {tools}/sambamba slice --output-filename={DIR_mapped}{params.sample}/per_chrom/{params.sample}'_'$chrom'.bam' {DIR_mapped}{params.sample}/{params.sample}_sorted.bam $chrom ; done"
 #     "{tools}/sambamba slice --output-filename={output} {input} {params.chrom}"
 # 
-# # ==========================================================================================
-# # Process unaligned reads + deduplication
-# 
+
+# ==========================================================================================
+# Mapping + deduplication :  
+
 # # treat unaligned reads as single-end, map the into a genome and merge them to a bam
 # # file with aligned reads
+# Process unaligned reads + deduplication
 # include: "./Rules/Unaligned_rules.py"
-# 
-# 
-# # ==========================================================================================
-# # Mapping:
-# 
-rule sort_index_bam_mapped:
-  input:
-    DIR_mapped+"{sample}/{sample}.bam"
-  output:
-    DIR_mapped+"{sample}/{sample}_sorted.bam"
-  params:
-    sort_args = config['args']['sambamba_sort'],
-    tmpdir=DIR_mapped+"{sample}/"
-  log:
-    DIR_mapped+"{sample}/{sample}_sort.log"
-  benchmark:
-    outputdir+"benchmarks/{sample}.sort_index_bam_mapped.benchmark.txt"
-  shell:
-    "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err"
-
-rule align_pe:
-     input:
-         refconvert_CT = genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
-         refconvert_GA = genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa",
-         # fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
-         # fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
-         fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
-         fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
-         #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
-         #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
-     output:
-         bam = DIR_mapped+"{sample}/{sample}.bam",
-         report = DIR_mapped+"{sample}/{sample}_bismark_bt2_PE_report.txt",
-         un1 = DIR_mapped+"{sample}/{sample}_unmapped_1.fq.gz",
-         un2 = DIR_mapped+"{sample}/{sample}_unmapped_2.fq.gz"
-         #odir = DIR_mapped+"{sample}/"
-     params:
-        # Bismark parameters
-         bismark_args = config['args']['bismark'],
-         genomeFolder = "--genome_folder " + genomedir,
-         outdir = "--output_dir  "+DIR_mapped+"{sample}/",
-         #nucCov = "--nucleotide_coverage",
-         pathToBowtie = "--path_to_bowtie " + config['tools'],
-         useBowtie2  = "--bowtie2 ",
-         samtools    = "--samtools_path "+ config['tools']+'samtools',
-         tempdir     = "--temp_dir "+DIR_mapped+"/{sample}"
-     log:
-         DIR_mapped+"{sample}/{sample}_bismark_pe_mapping.log"
-     message: "Mapping paired-end reads to genome."
-     benchmark:
-        outputdir+"benchmarks/{sample}.align_pe.benchmark.txt"
-     run:
-         sample_name = os.path.basename(input.fin1[:-14])
-         output_odir = DIR_mapped+sample_name+"/"
-         commands = [
-	       '{tools}/bismark {params} -1 {input.fin1} -2 {input.fin2} > {log} 2> {log}.err;',
-         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_pe.bam {output.bam};',
-         'mv '+output_odir+sample_name+'_1_val_1_bismark_bt2_PE_report.txt {output.report};',
-         'mv '+output_odir+os.path.basename(input.fin1)+'_unmapped_reads_1.fq.gz {output.un1};',
-         'mv '+output_odir+os.path.basename(input.fin2)+'_unmapped_reads_2.fq.gz {output.un2};'
-         ]
-         for c in commands:
-           shell(c)
-
-      
-# 
-# # ==========================================================================================
-# # Generate methyl-converted version of the reference genome:
-#            
-
-rule bismark_genome_preparation:
-    input:
-        ancient(genomedir)
-    output:
-        genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa",
-        genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"
-    params:
-        pathToBowtie = "--path_to_bowtie "+ tools,
-        useBowtie2   = "--bowtie2 ",
-        verbose      = "--verbose "
-    log:
-        genomedir+'bismark_genome_preparation_'+ASSEMBLY+'.log'
-    message: "Converting {ASSEMBLY} Genome into Bisulfite analogue"
-    shell:
-        "bismark_genome_preparation {params} {input} > {log} 2> {log}.err"
-
+#include: "./Rules/Align_bismark_rules.py"
+include: "./Rules/Align_bwameth_rules.py"
 
            
 # ==========================================================================================
 # Subset reads:           
-# indir="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/02_trimming/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/"
-# f1=$indir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_1_val_1.fq.gz
-# f2=$indir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_2_val_2.fq.gz
-# 
-# outdir="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/subset_reads/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/"
-# o1=$outdir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_1_val_1.fq.gz
-# o2=$outdir/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_2_val_2.fq.gz
-# 
-# 
-# reformat.sh reads=100000 sampleseed=1564 in=$f1 in2=$f2 out=$o1 out2=$o2 overwrite=true 2> $outdir/err.txt
-
 rule subset_reads_pe:
     input:
       i1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
