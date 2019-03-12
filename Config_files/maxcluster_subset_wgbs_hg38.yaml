@@ -1,6 +1,7 @@
 ---
 input: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Data/Raw/Renamed/"
-output: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/"
+#input: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Data/Raw_merged_random10Mlanespe/"
+output: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming/"
 genome: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Base/Genomes/hg38/hg38_canonical/hg38.sel.fa"
 tools: "/home/kwreczy/miniconda3/envs/makeNGSnake/bin/" # 
 chromsfile: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Base/Genomes/hg38/hg38_canonical/hg38.chrom.sizes" #
@@ -24,6 +25,6 @@ treatment: ''
 treatment2: ''
 
 # Here is info how I ran it: 
-#snakemake -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 5  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds
+#snakemake -n -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds
 # on cluster:
 #snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_rt=120:00:00 -l h_vmem=8g -pe smp 17 -N '{rule}_'"   

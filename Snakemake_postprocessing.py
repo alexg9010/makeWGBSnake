@@ -12,7 +12,7 @@ from snakemake.utils import R
 # Input/output parameters
 # ==========================================================================================
 
-# Load params from a config file
+# Load parameters from a config file
 inputdir = config["input"]
 outputdir = config["output"]
 genomedir = os.path.dirname(config["genome"])+"/"
@@ -33,8 +33,6 @@ SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
 #SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
 
-# snakemake -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 5  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds
-
 try:
   TREATMENT = config['treatment']
   TREATMENT_UNIQUE = set(TREATMENT)
@@ -50,6 +48,10 @@ CHROMS_CANON = [line.rstrip('\n').split("\t")[0] for line in open(chromcanonical
 ASSEMBLY=config["assembly"]
 MINCOV=ARGS["MINCOV"]
 MINQUAL=ARGS["MINQUAL"]
+
+SUBSET_READS = config['subset_reads']==True
+
+
 
 
 # ==========================================================================================
@@ -75,14 +77,20 @@ DIR_multiqc = outputdir+"multiqc/"
 DIR_ucschub = outputdir+"ucsc_hub/"
 
 ########################### TODO [START]
-DIR_trimmed_subset=outputdir+'subset_reads/'
+if SUBSET_READS:
+  DIR_trimmed_subset=outputdir+'subset_reads/'
+  DIR_input_subset=inputdir+'subset_reads/'
+
 DIR_mapped_bwameth      = outputdir+'04_mapping_bwameth/'
 ########################### TODO [END]
+
+
+
+
 
 # ==========================================================================================
 # Output files
 
-# No rule to produce sort_index_bam_mapped (if you use input functions make sure that they don't raise unexpected exceptions).
 
 # Construct all the files we're eventually expecting to have.
 FINAL_FILES = []
@@ -114,12 +122,22 @@ FINAL_FILES = []
 FINAL_FILES.extend(
     expand(DIR_mapped+"{sample}/{sample}.flagstat.txt",sample=SAMPLES)
 )
-
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}.stats.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}.idxstats.txt",sample=SAMPLES)
+)
 
 # # # Subset reads
 # FINAL_FILES.extend(
 #    expand(DIR_trimmed_subset+"{sample}/{sample}_{ext}_val_{ext}.fq.gz", sample=SAMPLES, ext=["1", "2"])
 # )
+
+# FINAL_FILES.extend(
+#    expand(DIR_input_subset+"{sample}_1.fq.gz", sample=SAMPLES, ext=["1", "2"])
+# )
+
 # 
 # #
 # # Alignment
@@ -340,23 +358,41 @@ include: "./Rules/Align_bwameth_rules.py"
 
            
 # ==========================================================================================
-# Subset reads:           
-rule subset_reads_pe:
-    input:
-      i1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
-      i2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
-    output:
-      o1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
-      o2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
-    params:
-        reads = " reads=100000 ",
-        sampleseed=" sampleseed=1564 "
-    log:
-        DIR_trimmed_subset+'{sample}/reformat_{sample}.log'
-    message: "Subset reads with reformat.sh"
-    shell:
-        "reformat.sh {params} in={input.i1} in2={input.i2} out={output.o1} out2={output.o2} overwrite=true 2> {log}.err"  
+# Subset reads:   
 
+if SUBSET_READS:
+
+  rule subset_reads_trimmed_pe:
+      input:
+        i1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+        i2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
+      output:
+        o1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
+        o2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
+      params:
+          reads = " reads=100000 ",
+          sampleseed=" sampleseed=1564 "
+      log:
+          DIR_trimmed_subset+'{sample}/reformat_{sample}.log'
+      message: "Subset reads with reformat.sh"
+      shell:
+          "reformat.sh {params} in={input.i1} in2={input.i2} out={output.o1} out2={output.o2} overwrite=true 2> {log}.err"  
+
+  rule subset_reads_pe:
+      input:
+        i1 = inputdir+"{sample}_1.fq.gz",
+        i2 = inputdir+"{sample}_2.fq.gz",
+      output:
+        o1 = DIR_input_subset+"{sample}_1.fq.gz",
+        o2 = DIR_input_subset+"{sample}_2.fq.gz",
+      params:
+          reads = " reads=100000 ",
+          sampleseed=" sampleseed=1564 "
+      log:
+          DIR_trimmed_subset+'{sample}/reformat_{sample}.log'
+      message: "Subset reads with reformat.sh"
+      shell:
+          "reformat.sh {params} in={input.i1} in2={input.i2} out={output.o1} out2={output.o2} overwrite=true 2> {log}.err"  
 
 
 # ==========================================================================================
