@@ -49,7 +49,7 @@ ASSEMBLY=config["assembly"]
 MINCOV=ARGS["MINCOV"]
 MINQUAL=ARGS["MINQUAL"]
 
-SUBSET_READS = config['subset_reads']==True
+SUBSET_READS = config['args']['subset_reads']==True
 
 
 
