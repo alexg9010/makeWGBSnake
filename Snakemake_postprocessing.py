@@ -39,7 +39,7 @@ try:
   SAMPLE_TREAT_DICT = dict(zip(SAMPLES, TREATMENT))
 except KeyError:
   print("No treatment supplied")
-  TREATMENT, TREATMENT_UNIQUE,AMPLE_TREAT_DICT = [],[],[]
+  TREATMENT, TREATMENT_UNIQUE,SAMPLE_TREAT_DICT = [],[],[]
   
 CHROMS = [line.rstrip('\n').split("\t")[0] for line in open(chromsfile)] 
 CHROMS_LENGTH = [line.rstrip('\n').split("\t")[1] for line in open(chromsfile)]
@@ -65,7 +65,7 @@ DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
-DIR_mapped      = outputdir+'04_mapping_bwameth/'
+DIR_mapped      = outputdir+'04_mapping/'
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 DIR_trimmed     = outputdir+'02_trimming/'
 DIR_rawqc       = outputdir+'01_raw_QC/'
@@ -82,6 +82,7 @@ if SUBSET_READS:
   DIR_input_subset=inputdir+'subset_reads/'
 
 DIR_mapped_bwameth      = outputdir+'04_mapping_bwameth/'
+#DIR_mapped      = DIR_mapped_bwameth
 ########################### TODO [END]
 
 

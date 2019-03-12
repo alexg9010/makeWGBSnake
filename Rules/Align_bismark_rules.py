@@ -21,6 +21,36 @@
 # # ==========================================================================================
 # # Mapping:
 # 
+
+
+rule idxstats_bismark:
+  input:
+    DIR_mapped+"{sample}/{sample}_sorted.bam"
+  output:
+    DIR_mapped+"{sample}/{sample}.idxstats.txt"
+  shell:
+    "samtools idxstats {input} > {output}"
+
+
+rule stat_bismark:
+  input:
+    DIR_mapped+"{sample}/{sample}_sorted.bam"
+  output:
+    DIR_mapped+"{sample}/{sample}.stats.txt"
+  shell:
+    "samtools stats {input} > {output}"
+
+
+rule flagstat_bismark:
+  input:
+    DIR_mapped+"{sample}/{sample}_sorted.bam"
+  output:
+    DIR_mapped+"{sample}/{sample}.flagstat.txt"
+  shell:
+    "samtools flagstat {input} > {output}"
+
+
+
 rule sort_index_bam_mapped:
   input:
     DIR_mapped+"{sample}/{sample}.bam"
@@ -40,10 +70,10 @@ rule bismark_align_pe:
      input:
          refconvert_CT = ancient(genomedir+"Bisulfite_Genome/CT_conversion/genome_mfa.CT_conversion.fa"),
          refconvert_GA = ancient(genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"),
-         # fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
-         # fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
-         fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
-         fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
+         fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+         fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz"
+         #fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
+         #fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
          #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
          #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
      output:
