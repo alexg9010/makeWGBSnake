@@ -9,9 +9,9 @@ assembly: "hg38"
 args:
   fastqc: ''
   trim_galore: "  --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5   "
-  #bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
-  #bismark_unmapped: "   "
-  bwameth: "-t 12"
+  bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
+  bismark_unmapped: " --chunkmbs 100  "
+  #bwameth: "-t 12"
   methCall: ''
   MINCOV: "10"
   MINQUAL: "20"
@@ -27,4 +27,4 @@ treatment2: ''
 # Here is info how I ran it: 
 #snakemake -n -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds
 # on cluster:
-#snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_rt=120:00:00 -l h_vmem=8g -pe smp 17 -N '{rule}_'"   
+#snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y -l h_rt=72:00:00 -l h_vmem=18g -pe smp 6 -N '{rule}_'"   

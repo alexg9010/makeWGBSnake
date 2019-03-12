@@ -4,19 +4,18 @@
 
 
 #RUNIDS = 
-
-rule_merge_runs:
-  input:
-    [DIR_mapped+"{runid}/{runid}.bam" for runid in RUNIDS]
-  output: 
-    DIR_mapped+"{sample}/{sample}.bam"
-  threads=5
-  shell:
-    """
-     {tools}/sambamba merge -t {threads} {output} {input}
-     {tools}/sambamba sort {params.unsorted_output} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
-     rm {params.unsorted_output}
-    """
+# rule_merge_runs:
+#   input:
+#     [DIR_mapped+"{runid}/{runid}.bam" for runid in RUNIDS]
+#   output: 
+#     DIR_mapped+"{sample}/{sample}.bam"
+#   threads=5
+#   shell:
+#     """
+#      {tools}/sambamba merge -t {threads} {output} {input}
+#      {tools}/sambamba sort {params.unsorted_output} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
+#      rm {params.unsorted_output}
+#     """
 
 
 # # ==========================================================================================

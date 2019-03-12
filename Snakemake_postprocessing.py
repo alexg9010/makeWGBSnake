@@ -353,8 +353,8 @@ rule target:
 # # file with aligned reads
 # Process unaligned reads + deduplication
 # include: "./Rules/Unaligned_rules.py"
-#include: "./Rules/Align_bismark_rules.py"
-include: "./Rules/Align_bwameth_rules.py"
+include: "./Rules/Align_bismark_rules.py"
+#include: "./Rules/Align_bwameth_rules.py"
 
            
 # ==========================================================================================
