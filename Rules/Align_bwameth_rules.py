@@ -79,7 +79,7 @@ if not SUBSET_READS:
          DIR_mapped+"{sample}/{sample}_bwameth_pe_mapping.log"
      message: "Mapping paired-end reads to genome using bwa-meth."
      shell:
-         "bwameth.py {params.bwameth_args} --reference {genomefile} {input.fin1} {input.fin2} > {output}"
+         "bwameth.py {params.bwameth_args} --reference {genomefile} {input.fin1} {input.fin2} > {output} 2> {log}.err"
 
 
 #########################################################################

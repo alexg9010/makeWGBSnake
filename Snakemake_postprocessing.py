@@ -101,6 +101,13 @@ FINAL_FILES = []
 #   expand(DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
 # )
 # 
+
+# # # trim
+# FINAL_FILES.extend(
+#    expand(DIR_trimmed+"{sample}/{sample}_{ext}_val_{ext}.fq.gz",sample=SAMPLES, ext=["1", "2"])
+# )#
+
+
 # # Fastqc afater trimming
 # FINAL_FILES.extend(
 #    expand(DIR_posttrim_QC+"{sample}/{sample}_{ext}_val_{ext}_fastqc.html",sample=SAMPLES, ext=["1", "2"])
@@ -354,8 +361,8 @@ rule target:
 # # file with aligned reads
 # Process unaligned reads + deduplication
 # include: "./Rules/Unaligned_rules.py"
-include: "./Rules/Align_bismark_rules.py"
-#include: "./Rules/Align_bwameth_rules.py"
+#include: "./Rules/Align_bismark_rules.py"
+include: "./Rules/Align_bwameth_rules.py"
 
            
 # ==========================================================================================

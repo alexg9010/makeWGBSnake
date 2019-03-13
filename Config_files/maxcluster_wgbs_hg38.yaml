@@ -1,6 +1,6 @@
 ---
 input: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Data/Raw/Renamed/"
-output: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/hg38/"
+output: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Results/hg38/bwameth_per_lane/"
 genome: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Base/Genomes/hg38/hg38_canonical/hg38.sel.fa"
 tools: "/home/kwreczy/miniconda3/envs/makeNGSnake/bin/" # 
 chromsfile: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Base/Genomes/hg38/hg38_canonical/hg38.chrom.sizes" #
@@ -11,7 +11,7 @@ args:
   trim_galore: "  --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5   "
   bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
   bismark_unmapped: " --chunkmbs 100  "
-  #bwameth: "-t 12"
+  bwameth: "-t 1"
   methCall: ''
   MINCOV: "10"
   MINQUAL: "20"
