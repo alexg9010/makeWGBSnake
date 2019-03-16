@@ -27,4 +27,4 @@ treatment2: ''
 # Here is info how I ran it: 
 #snakemake -n -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds
 # on cluster:
-#snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y -l h_rt=72:00:00 -l h_vmem=18g -pe smp 6 -N '{rule}_'"   
+#snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y -l h_rt=144:00:00 -l h_vmem=18g -pe smp 6 -N 'bbmethnotsure_{rule}_'"   

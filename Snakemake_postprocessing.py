@@ -28,8 +28,8 @@ except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
 ########################### TODO [START]
-SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
-#SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+#SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
+SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
 
@@ -51,7 +51,7 @@ MINQUAL=ARGS["MINQUAL"]
 
 SUBSET_READS = config['args']['subset_reads']==True
 
-
+# /fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/04_mapping/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_sort.log.err
 
 
 # ==========================================================================================
@@ -65,9 +65,9 @@ DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
-DIR_mapped      = outputdir+'04_mapping/'
+DIR_mapped      = outputdir+'04_mapping_notsureaboutit/'     ############'04_mapping/' ##########################################
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
-DIR_trimmed     = outputdir+'02_trimming/'
+DIR_trimmed     = outputdir+'/02_trimming/' 
 DIR_rawqc       = outputdir+'01_raw_QC/'
 DIR_bam_per_chrom = DIR_mapped+'bam_per_chr/' 
 DIR_seg = outputdir+'08_segmentation/'
@@ -77,11 +77,11 @@ DIR_multiqc = outputdir+"multiqc/"
 DIR_ucschub = outputdir+"ucsc_hub/"
 
 ########################### TODO [START]
-if SUBSET_READS:
-  DIR_trimmed_subset=outputdir+'subset_reads/'
-  DIR_input_subset=inputdir+'subset_reads/'
+#if SUBSET_READS:
+DIR_trimmed_subset=outputdir+'subset_reads/'
+DIR_input_subset=inputdir+'subset_reads/'
 
-DIR_mapped_bwameth      = outputdir+'04_mapping_bwameth/'
+#DIR_mapped_bwameth      = outputdir+'04_mapping_bwameth/' ##################
 #DIR_mapped      = DIR_mapped_bwameth
 ########################### TODO [END]
 
@@ -119,29 +119,30 @@ FINAL_FILES = []
 #    expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
 # )
 
-# # # Create genome bisulfite index
-# FINAL_FILES.extend(
-#    expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
-# )
-
+# # Create genome bisulfite index
 FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.flagstat.txt",sample=SAMPLES)
+   expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
 )
 FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.stats.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.idxstats.txt",sample=SAMPLES)
+    expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
 )
 
-# # # Subset reads
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}.bwameth.flagstat.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}.bwameth.stats.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}.bwameth.idxstats.txt",sample=SAMPLES)
+)
+
+
+
+# # # # Subset reads
 # FINAL_FILES.extend(
 #    expand(DIR_trimmed_subset+"{sample}/{sample}_{ext}_val_{ext}.fq.gz", sample=SAMPLES, ext=["1", "2"])
 # )
-
 # FINAL_FILES.extend(
 #    expand(DIR_input_subset+"{sample}_1.fq.gz", sample=SAMPLES, ext=["1", "2"])
 # )
@@ -186,12 +187,25 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
 # )
+# 
+
 #
 # # Sort merged PE and SE reads
 # FINAL_FILES.extend(
 #   expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
 # )
 #
+
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
+# )
+
 # # Deduplicate
 # FINAL_FILES.extend(
 #   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
@@ -304,20 +318,20 @@ rule target:
 # #
 # # rules for PE and SE+PE
 # #include: "./Rules/Segmentation_rules.py"
-# include: "./Rules/Segmentation_merged_rules.py"
+#include: "./Rules/Segmentation_merged_rules.py"
 # 
 # # ==========================================================================================
 # # Differential methylation in a pairwise manner
 # #
 # # rules for PE and SE+PE
-# include: "./Rules/DMC_pairwise.py"
+#include: "./Rules/DMC_pairwise.py"
 # 
 # 
 # # ==========================================================================================
 # # Export a bigwig file:
 # #
 # # rules for PE and SE+PE
-# include: "./Rules/Export_BW.py"
+#include: "./Rules/Export_BW.py"
 # 
 #        
 # # ==========================================================================================
@@ -325,7 +339,7 @@ rule target:
 # # 
 # # rules for PE and SE+PE
 # #include: "./Rules/Meth_preprocessing_rules.py"
-# include: "./Rules/Meth_preprocessing_merged_rules.py"
+#include: "./Rules/Meth_preprocessing_merged_rules.py"
 # 
 # 
 # # ==========================================================================================
@@ -360,7 +374,7 @@ rule target:
 # # treat unaligned reads as single-end, map the into a genome and merge them to a bam
 # # file with aligned reads
 # Process unaligned reads + deduplication
-# include: "./Rules/Unaligned_rules.py"
+#include: "./Rules/Unaligned_rules.py"
 #include: "./Rules/Align_bismark_rules.py"
 include: "./Rules/Align_bwameth_rules.py"
 
@@ -368,6 +382,7 @@ include: "./Rules/Align_bwameth_rules.py"
 # ==========================================================================================
 # Subset reads:   
 
+# reformat.sh is a part bbmap
 if SUBSET_READS:
 
   rule subset_reads_trimmed_pe:

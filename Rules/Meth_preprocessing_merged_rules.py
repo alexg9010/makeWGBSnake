@@ -194,12 +194,5 @@ rule methCall_CpG_perchr_pe_se:
                  --logFile={log}
        """
 
-          # /fast/users/kwreczy_m/programs/bin/miniconda3/envs/mybase/bin//Rscript /fast/users/kwreczy_m/projects/makeWGBSnake/Scripts//methCall.R                  --inBam=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/05_deduplication/Sampled_236L96/per_chrom/Sampled_236L96_chr1_merged.dedup.sorted.bam                  --assembly=hg19 \
-          #      --mincov=10                  --minqual=20                  --context=CpG                  --save_db=True \
-          #  --save_folder=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/Sampled_236L96/per_chrom/             \
-          #  --sample_id=Sampled_236L96_chr1_merged                  --logFile=/fast/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg19/snakemake_test/06_methyl_calls/Sampled_236L96/per_chrom/Sampled_236L96_chr1_merged.meth_calls.log
-          # 
-          # 
-          # 
 
 

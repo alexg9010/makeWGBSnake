@@ -12,7 +12,7 @@ rule idxstats_bwameth:
   input:
     DIR_mapped+"{sample}/{sample}.bwameth_sorted.bam"
   output:
-    DIR_mapped+"{sample}/{sample}.idxstats.txt"
+    DIR_mapped+"{sample}/{sample}.bwameth.idxstats.txt"
   shell:
     "samtools idxstats {input} > {output}"
 
@@ -21,7 +21,7 @@ rule stat_bwameth:
   input:
     DIR_mapped+"{sample}/{sample}.bwameth_sorted.bam"
   output:
-    DIR_mapped+"{sample}/{sample}.stats.txt"
+    DIR_mapped+"{sample}/{sample}.bwameth.stats.txt"
   shell:
     "samtools stats {input} > {output}"
 
@@ -30,7 +30,7 @@ rule flagstat_bwameth:
   input:
     DIR_mapped+"{sample}/{sample}.bwameth_sorted.bam"
   output:
-    DIR_mapped+"{sample}/{sample}.flagstat.txt"
+    DIR_mapped+"{sample}/{sample}.bwameth.flagstat.txt"
   shell:
     "samtools flagstat {input} > {output}"
 
@@ -109,27 +109,27 @@ if not SUBSET_READS:
 #          "bwameth.py {params.bwameth_args} --reference {genomefile} {input.fin1} {input.fin2} > {output}"
 
 
-#if SUBSET_READS:
-# rule bwameth_align_pe:
-#      input:
-#          genomefile+".bwameth.c2t.sa",
-#          genomefile+".bwameth.c2t.amb",
-#          genomefile+".bwameth.c2t.ann",
-#          genomefile+".bwameth.c2t.pac",
-#          genomefile+".bwameth.c2t.bwt",
-#          genomefile+".bwameth.c2t",
-#          fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
-#          fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
-#      output:
-#          bam = DIR_mapped+"{sample}/{sample}.bwameth.sam"
-#      params:
-#         # Bismark parameters
-#          bwameth_args = config['args']['bwameth']
-#      log:
-#          DIR_mapped+"{sample}/{sample}_bwameth_pe_mapping.log"
-#      message: "Mapping paired-end reads to genome using bwa-meth."
-#      shell:
-#          "bwameth.py {params.bwameth_args} --reference {genomefile} {input.fin1} {input.fin2} > {output}"
+if SUBSET_READS:
+  rule bwameth_align_pe:
+     input:
+         genomefile+".bwameth.c2t.sa",
+         genomefile+".bwameth.c2t.amb",
+         genomefile+".bwameth.c2t.ann",
+         genomefile+".bwameth.c2t.pac",
+         genomefile+".bwameth.c2t.bwt",
+         genomefile+".bwameth.c2t",
+         fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
+         fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
+     output:
+         bam = DIR_mapped+"{sample}/{sample}.bwameth.sam"
+     params:
+        # Bismark parameters
+         bwameth_args = config['args']['bwameth']
+     log:
+         DIR_mapped+"{sample}/{sample}_bwameth_pe_mapping.log"
+     message: "Mapping paired-end reads to genome using bwa-meth."
+     shell:
+         "bwameth.py {params.bwameth_args} --reference {genomefile} {input.fin1} {input.fin2} > {output}"
 
    
 # reference=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Base/Genomes/hg38/hg38_canonical/hg38.sel.fa
