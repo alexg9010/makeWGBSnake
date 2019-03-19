@@ -51,7 +51,6 @@ MINQUAL=ARGS["MINQUAL"]
 
 SUBSET_READS = config['args']['subset_reads']==True
 
-
 # ==========================================================================================
 # Output directories
 
@@ -63,7 +62,8 @@ DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
-DIR_mapped      = outputdir+'04_mapping_bwameth/'     ############'04_mapping/' ##########################################
+#DIR_mapped      = outputdir+'04_mapping_bwameth/'     ######TODO###### BWA METH ##########################################
+DIR_mapped      = outputdir+'04_mapping/'     #####TODO#######  BISMARK  ##########################################
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 DIR_trimmed     = outputdir+'/02_trimming/' 
 DIR_rawqc       = outputdir+'01_raw_QC/'
@@ -117,22 +117,22 @@ FINAL_FILES = []
 # )
 
 # # Create genome bisulfite index
-FINAL_FILES.extend(
-   expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
-)
-
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.flagstat.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.stats.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.idxstats.txt",sample=SAMPLES)
-)
+# FINAL_FILES.extend(
+#    expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
+# )
+# 
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.flagstat.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.stats.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.idxstats.txt",sample=SAMPLES)
+# )
 
 
 
@@ -162,13 +162,13 @@ FINAL_FILES.extend(
 # )
 
 
-# # Align unmapped reads as sinle-end
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
-# )
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
-# )
+# Align unmapped reads as sinle-end
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
+)
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+)
 
 # ## Single-end
 # FINAL_FILES.extend(
@@ -180,18 +180,10 @@ FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_2_pbat_sorted.bam",sample=SAMPLES)
 # )
 #
-# # Merge PE and SE reads
-# FINAL_FILES.extend(
-#   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
-# )
-# 
-
-#
-# # Sort merged PE and SE reads
-# FINAL_FILES.extend(
-#   expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
-# )
-#
+# Merge PE and SE reads
+FINAL_FILES.extend(
+  expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+)
 
 # FINAL_FILES.extend(
 #     expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
@@ -371,8 +363,8 @@ rule target:
 # # treat unaligned reads as single-end, map the into a genome and merge them to a bam
 # # file with aligned reads
 # Process unaligned reads + deduplication
-#include: "./Rules/Unaligned_rules.py"
-#include: "./Rules/Align_bismark_rules.py"
+include: "./Rules/Unaligned_rules.py"
+include: "./Rules/Align_bismark_rules.py"
 include: "./Rules/Align_bwameth_rules.py"
 
            
