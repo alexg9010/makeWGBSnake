@@ -28,8 +28,8 @@ except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
 ########################### TODO [START]
-#SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
-SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
+SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
+#SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
 
@@ -51,8 +51,6 @@ MINQUAL=ARGS["MINQUAL"]
 
 SUBSET_READS = config['args']['subset_reads']==True
 
-# /fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/04_mapping/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_sort.log.err
-
 
 # ==========================================================================================
 # Output directories
@@ -65,7 +63,7 @@ DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
-DIR_mapped      = outputdir+'04_mapping_notsureaboutit/'     ############'04_mapping/' ##########################################
+DIR_mapped      = outputdir+'04_mapping_bwameth/'     ############'04_mapping/' ##########################################
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 DIR_trimmed     = outputdir+'/02_trimming/' 
 DIR_rawqc       = outputdir+'01_raw_QC/'
@@ -80,7 +78,6 @@ DIR_ucschub = outputdir+"ucsc_hub/"
 #if SUBSET_READS:
 DIR_trimmed_subset=outputdir+'subset_reads/'
 DIR_input_subset=inputdir+'subset_reads/'
-
 #DIR_mapped_bwameth      = outputdir+'04_mapping_bwameth/' ##################
 #DIR_mapped      = DIR_mapped_bwameth
 ########################### TODO [END]

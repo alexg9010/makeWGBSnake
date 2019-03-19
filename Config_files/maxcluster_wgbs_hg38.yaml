@@ -28,3 +28,29 @@ treatment2: ''
 #snakemake -n -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds
 # on cluster:
 #snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y -l h_rt=144:00:00 -l h_vmem=18g -pe smp 6 -N 'bbmethnotsure_{rule}_'"   
+
+#scp -r /data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Results/hg38/bwameth_per_lane/02_trimming/ kwreczy_m@med-login1.bihealth.org:/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane/
+
+
+
+#for file in $(ls /fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/02_trimming/) ; do 
+#     #scp $file server:/tmp/ & 
+#     scp -r /fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/02_trimming/$file kwreczy_m@med-login1.bihealth.org:/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane/02_trimming_frombeast1/ & 
+#done
+
+
+
+foo = ScoreMatrixList(list(first=as(matrix(1), "ScoreMatrix"),
+                           second=as(matrix(2,nrow=2,ncol=2), "ScoreMatrix")))
+foo["second"]
+
+
+
+
+
+
+
+
+
+
+

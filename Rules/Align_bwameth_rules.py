@@ -143,22 +143,22 @@ if SUBSET_READS:
 # # Generate methyl-converted version of the reference genome:
 #       
 
-# rule bwameth_genome_preparation:
-#     input:
-#         ancient(genomefile)
-#     output:
-#         genomefile+".bwameth.c2t.sa",
-#         genomefile+".bwameth.c2t.amb",
-#         genomefile+".bwameth.c2t.ann",
-#         genomefile+".bwameth.c2t.pac",
-#         genomefile+".bwameth.c2t.bwt",
-#         genomefile+".bwameth.c2t"
-#     log:
-#         genomedir+'bismark_genome_preparation_'+ASSEMBLY+'.log'
-#     message: "Converting {ASSEMBLY} Genome into Bisulfite analogue with bwa-meth"
-#     shell:
-#         "bwameth.py index {input}"
-#        
+rule bwameth_genome_preparation:
+    input:
+        ancient(genomefile)
+    output:
+        genomefile+".bwameth.c2t.sa",
+        genomefile+".bwameth.c2t.amb",
+        genomefile+".bwameth.c2t.ann",
+        genomefile+".bwameth.c2t.pac",
+        genomefile+".bwameth.c2t.bwt",
+        genomefile+".bwameth.c2t"
+    log:
+        genomedir+'bismark_genome_preparation_'+ASSEMBLY+'.log'
+    message: "Converting {ASSEMBLY} Genome into Bisulfite analogue with bwa-meth"
+    shell:
+        "bwameth.py index {input}"
+
 # bwameth.py index $REF
 # bwameth.py --reference $REF some_R1.fastq.gz some_R2.fastq.gz > some.output.sam        
 #         
