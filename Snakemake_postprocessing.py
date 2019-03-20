@@ -5,6 +5,11 @@
 # Copyright © 2018 Katarzyna Wreczycka katarzyna.wreczycka@mdc-berlin.de
 # This pipeline is heavily based on the PiGx BSseq pipeline github.com/BIMSBbioinfo/pigx_bsseq
 
+
+# TODO:
+### add divide bwa-meth output into paired data and singletons and run multiqc on it
+###
+
 import glob, os, re
 from snakemake.utils import R
 
@@ -63,7 +68,7 @@ DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
 #DIR_mapped      = outputdir+'04_mapping_bwameth/'     ######TODO###### BWA METH ##########################################
-DIR_mapped      = outputdir+'04_mapping/'     #####TODO#######  BISMARK  ##########################################
+DIR_mapped      = outputdir+'04_mapping_bismark_all/'     #####TODO#######  BISMARK  ##########################################
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 DIR_trimmed     = outputdir+'/02_trimming/' 
 DIR_rawqc       = outputdir+'01_raw_QC/'
@@ -162,10 +167,10 @@ FINAL_FILES = []
 # )
 
 
-# Align unmapped reads as sinle-end
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
-)
+# # Align unmapped reads as sinle-end
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
+# )
 FINAL_FILES.extend(
    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
 )
@@ -180,20 +185,20 @@ FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_2_pbat_sorted.bam",sample=SAMPLES)
 # )
 #
-# Merge PE and SE reads
-FINAL_FILES.extend(
-  expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
-)
+# # Merge PE and SE reads
+# FINAL_FILES.extend(
+#   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
+# )
 
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
-# )
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
+)
 
 # # Deduplicate
 # FINAL_FILES.extend(

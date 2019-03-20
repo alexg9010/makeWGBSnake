@@ -1,8 +1,9 @@
 ---
 input: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Data/Raw/Renamed/"
 #input: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Data/Raw_merged_random10Mlanespe/"
-#output: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/"
-output: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/"
+# I use this path only because trimming is on whole subset here, later need to move it
+output: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/"
+#output: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/"
 genome: "/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Base/Genomes/hg38/hg38_canonical/hg38.sel.fa"
 tools: "/home/kwreczy/miniconda3/envs/makeNGSnake/bin/" # 
 chromsfile: "/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Base/Genomes/hg38/hg38_canonical/hg38.chrom.sizes" #
@@ -19,18 +20,19 @@ args:
   MINQUAL: "20"
   multiQC: ''
   bismark_genome_preparation: ''
-  sambamba_sort: " --memory-limit=2G --tmpdir=/data/akalin/Projects/BIH_Neuroblastoma/WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/temp/ -t 1"
+  sambamba_sort: " --memory-limit=3G --tmpdir=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane/temp/ -t 10"
   #sambamba_sort: " --memory-limit=30G --tmpdir=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results//subset_hg38/per_run_flowcell_lane/temp/ -t 1"
   picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=35000 "
-  subset_reads: True
+  subset_reads: False
 samples: ''
 treatment: ''
 treatment2: ''
 
 # Here is info how I ran it: 
-#snakemake -R sort_index_bam_mapped  -s  /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 30  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds# on cluster:
+#snakemake -R sort_index_bam_mapped  -s  /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 30  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds
+# on cluster:
 #snakemake -R sort_index_bam_mapped  -s  /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 30  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y -l h_vmem=10g -pe smp 12 -N '{rule}_'"
-#snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_rt=120:00:00 -l h_vmem=20g -pe smp 7 -N '{rule}_'"   
+#snakemake  -s /home/kwreczy//projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /home/kwreczy/projects/makeWGBSnake/Config_files/maxcluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l longrun -l h_vmem=20g -pe smp 7 -N '{rule}_'"   
 
 
 

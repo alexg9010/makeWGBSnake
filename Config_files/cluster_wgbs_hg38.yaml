@@ -30,7 +30,6 @@ treatment2: ''
 
 # Here is info how I ran it:
 # snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds
-
 #  snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
 
 
