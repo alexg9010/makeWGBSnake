@@ -5,6 +5,11 @@
 # Copyright © 2018 Katarzyna Wreczycka katarzyna.wreczycka@mdc-berlin.de
 # This pipeline is heavily based on the PiGx BSseq pipeline github.com/BIMSBbioinfo/pigx_bsseq
 
+
+# TODO:
+### add divide bwa-meth output into paired data and singletons and run multiqc on it
+###
+
 import glob, os, re
 from snakemake.utils import R
 
@@ -52,15 +57,6 @@ MINQUAL=ARGS["MINQUAL"]
 
 SUBSET_READS = config['args']['subset_reads']==True
 NOTRIMMING = config['args']['notrimming']==True
-
-# for i in $(ls $subsdir)
-# do
-# y=${i%_*.fq.gz}; 
-# dirname=${y##*/}
-# echo $dirname
-# #mkdir $dirname
-# fastqc -o ./$dirname $subsdir/$dirname'_1.fq.gz' $subsdir/$dirname'_2.fq.gz'
-# done
 
 # ==========================================================================================
 # Output directories
@@ -130,15 +126,12 @@ FINAL_FILES.extend(
 #    expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
 # )
 
-# # # Create genome bisulfite index
+# # Create genome bisulfite index
 # FINAL_FILES.extend(
 #    expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
 # )
-
-
-# Align with bwa-meth
 # FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}.bwameth_sorted.bam",sample=SAMPLES)
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
 # )
 # 
 # FINAL_FILES.extend(
@@ -183,9 +176,9 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
 # )
-# FINAL_FILES.extend(
-#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
-# )
+FINAL_FILES.extend(
+   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+)
 
 # ## Single-end
 # FINAL_FILES.extend(
@@ -201,24 +194,16 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
 # )
-# 
 
-#
-# # Sort merged PE and SE reads
-# FINAL_FILES.extend(
-#   expand(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam", sample=SAMPLES, chrom=CHROMS_CANON)
-# )
-#
-
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
-# )
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
+)
 
 # # Deduplicate
 # FINAL_FILES.extend(
@@ -388,8 +373,8 @@ rule target:
 # # treat unaligned reads as single-end, map the into a genome and merge them to a bam
 # # file with aligned reads
 # Process unaligned reads + deduplication
-#include: "./Rules/Unaligned_rules.py"
-#include: "./Rules/Align_bismark_rules.py"
+include: "./Rules/Unaligned_rules.py"
+include: "./Rules/Align_bismark_rules.py"
 include: "./Rules/Align_bwameth_rules.py"
 
            

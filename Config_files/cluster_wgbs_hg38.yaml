@@ -33,8 +33,9 @@ treatment2: ''
 # snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
 # snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'longnohardtrimming_{rule}_{wildcards.sample}'" 
 # snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'longwitrim_{rule}_{wildcards.sample}'" 
-
 #dd=/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane/04_mapping_bwameth_notrimming/22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4/
 #/fast/work/users/kwreczy_m/conda-prefix/envs/bsseqpipe/bin/sambamba slice $dd/22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4.bwameth_sorted.bam chr22 -o $dd/22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4.bwameth_sorted_chr22.bam
 #qsub ./script.sh -V -cwd -b y -l h_vmem=25g -pe smp 7 
+#  snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
+
 
