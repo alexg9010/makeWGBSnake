@@ -29,6 +29,7 @@ except KeyError:
 
 ########################### TODO [START]
 SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
+#SAMPLES = ["22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4"]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
@@ -50,7 +51,16 @@ MINCOV=ARGS["MINCOV"]
 MINQUAL=ARGS["MINQUAL"]
 
 SUBSET_READS = config['args']['subset_reads']==True
+NOTRIMMING = config['args']['notrimming']==True
 
+# for i in $(ls $subsdir)
+# do
+# y=${i%_*.fq.gz}; 
+# dirname=${y##*/}
+# echo $dirname
+# #mkdir $dirname
+# fastqc -o ./$dirname $subsdir/$dirname'_1.fq.gz' $subsdir/$dirname'_2.fq.gz'
+# done
 
 # ==========================================================================================
 # Output directories
@@ -63,9 +73,13 @@ DIR_bigwig      = outputdir+'07_bigwig_files/'
 DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
-DIR_mapped      = outputdir+'04_mapping_bwameth/'     ############'04_mapping/' ##########################################
+#DIR_mapped      = outputdir+'04_mapping/'     ############'04_mapping/' ##########################################
+#DIR_mapped      = outputdir+'04_mapping_bwameth/'     ############'04_mapping/' ##########################################
+DIR_mapped      = outputdir+'04_mapping_bwameth_notrimming/'     ############'04_mapping/' ##########################################
+#DIR_mapped      = outputdir+'04_mapping_bismark/'     ############'04_mapping/' ##########################################
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
-DIR_trimmed     = outputdir+'/02_trimming/' 
+#DIR_trimmed     = outputdir+'/02_trimming/' 
+DIR_trimmed     = outputdir+'/02_trimming_nohardtrimming/' 
 DIR_rawqc       = outputdir+'01_raw_QC/'
 DIR_bam_per_chrom = DIR_mapped+'bam_per_chr/' 
 DIR_seg = outputdir+'08_segmentation/'
@@ -99,10 +113,10 @@ FINAL_FILES = []
 # )
 # 
 
-# # # trim
-# FINAL_FILES.extend(
-#    expand(DIR_trimmed+"{sample}/{sample}_{ext}_val_{ext}.fq.gz",sample=SAMPLES, ext=["1", "2"])
-# )#
+# # trim
+FINAL_FILES.extend(
+   expand(DIR_trimmed+"{sample}/{sample}_{ext}_val_{ext}.fq.gz",sample=SAMPLES, ext=["1", "2"])
+)#
 
 
 # # Fastqc afater trimming
@@ -116,23 +130,26 @@ FINAL_FILES = []
 #    expand(genomedir+"Bisulfite_Genome/{din}_conversion/genome_mfa.{din}_conversion.fa",din=["CT","GA"])
 # )
 
-# # Create genome bisulfite index
-FINAL_FILES.extend(
-   expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.bam",sample=SAMPLES)
-)
+# # # Create genome bisulfite index
+# FINAL_FILES.extend(
+#    expand(genomefile+".bwameth.{ext}",ext=["c2t.sa","c2t.amb","c2t.ann","c2t.pac","c2t.bwt","c2t"])
+# )
 
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.flagstat.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.stats.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}.bwameth.idxstats.txt",sample=SAMPLES)
-)
+
+# Align with bwa-meth
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth_sorted.bam",sample=SAMPLES)
+# )
+# 
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.flagstat.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.stats.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}.bwameth.idxstats.txt",sample=SAMPLES)
+# )
 
 
 

@@ -72,8 +72,8 @@ rule bismark_align_pe:
          refconvert_GA = ancient(genomedir+"Bisulfite_Genome/GA_conversion/genome_mfa.GA_conversion.fa"),
          #fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
          #fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz"
-         fin1 = DIR_trimmed_subset+"{sample}/{sample}_1_val_1.fq.gz",
-         fin2 = DIR_trimmed_subset+"{sample}/{sample}_2_val_2.fq.gz",
+         fin1 = DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
+         fin2 = DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
          #qc   = [ DIR_posttrim_QC+"{sample}/{sample}_1_val_1_fastqc.html",
          #        DIR_posttrim_QC+"{sample}/{sample}_2_val_2_fastqc.html"]
      output:

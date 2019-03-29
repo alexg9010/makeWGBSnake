@@ -40,13 +40,6 @@ treatment2: ''
 
 
 
-foo = ScoreMatrixList(list(first=as(matrix(1), "ScoreMatrix"),
-                           second=as(matrix(2,nrow=2,ncol=2), "ScoreMatrix")))
-foo["second"]
-
-
-
-
 
 
 
