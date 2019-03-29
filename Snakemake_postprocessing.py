@@ -34,7 +34,7 @@ except KeyError:
 
 ########################### TODO [START]
 SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
-#SAMPLES = ["22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4"]
+SAMPLES = ["22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4"]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
@@ -70,8 +70,8 @@ DIR_methcall    = outputdir+'06_methyl_calls/'
 DIR_methcall_tabix    = outputdir+'06_methyl_calls/Tabix/'
 DIR_deduped_picard     = outputdir+'05_deduplication/'
 #DIR_mapped      = outputdir+'04_mapping/'     ############'04_mapping/' ##########################################
-#DIR_mapped      = outputdir+'04_mapping_bwameth/'     ############'04_mapping/' ##########################################
-DIR_mapped      = outputdir+'04_mapping_bwameth_notrimming/'     ############'04_mapping/' ##########################################
+DIR_mapped      = outputdir+'04_mapping_bwameth/'     ############'04_mapping/' ##########################################
+#DIR_mapped      = outputdir+'04_mapping_bwameth_notrimming/'     ############'04_mapping/' ##########################################
 #DIR_mapped      = outputdir+'04_mapping_bismark/'     ############'04_mapping/' ##########################################
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 #DIR_trimmed     = outputdir+'/02_trimming/' 
@@ -109,10 +109,10 @@ FINAL_FILES = []
 # )
 # 
 
-# # trim
-FINAL_FILES.extend(
-   expand(DIR_trimmed+"{sample}/{sample}_{ext}_val_{ext}.fq.gz",sample=SAMPLES, ext=["1", "2"])
-)#
+# # # trim
+# FINAL_FILES.extend(
+#    expand(DIR_trimmed+"{sample}/{sample}_{ext}_val_{ext}.fq.gz",sample=SAMPLES, ext=["1", "2"])
+# )#
 
 
 # # Fastqc afater trimming
@@ -176,9 +176,9 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}.bam",sample=SAMPLES, ext=["1", "2"])
 # )
-FINAL_FILES.extend(
-   expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
-)
+# FINAL_FILES.extend(
+#    expand(DIR_mapped+"{sample}/{sample}_unmapped_{ext}_sorted.bam",sample=SAMPLES, ext=["1", "2"])
+# )
 
 # ## Single-end
 # FINAL_FILES.extend(
@@ -195,51 +195,33 @@ FINAL_FILES.extend(
 #   expand(DIR_mapped+"{sample}/{sample}_sorted_merged.bam", sample=SAMPLES)
 # )
 
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
-)
-FINAL_FILES.extend(
-    expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
-)
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}_merged.flagstat.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}_merged.stats.txt",sample=SAMPLES)
+# )
+# FINAL_FILES.extend(
+#     expand(DIR_mapped+"{sample}/{sample}_merged.idxstats.txt",sample=SAMPLES)
+# )
+
 
 # # Deduplicate
-# FINAL_FILES.extend(
-#   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
-# )
-# # Deduplicate PE+SE
-# FINAL_FILES.extend(
-#   expand(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam",sample=SAMPLES, chrom=CHROMS_CANON)
-# )
+FINAL_FILES.extend(
+  expand(DIR_deduped_picard+"{sample}/{sample}.dedup.bam",sample=SAMPLES)
+)
 
-# # Merge deduplicated reads
-# FINAL_FILES.extend(
-#   expand(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam",sample=SAMPLES)
-# )
-# # Methylation call. files
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
-# )
-# # Methylation call. files PE+SE
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/per_chrom/{sample}_{chrom}_merged_cpg.txt.bgz",sample=SAMPLES, chrom=CHROMS_CANON)
-# )
-# 
-# # Merge methylation calling
+# # methylation calling
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz",sample=SAMPLES)
 # )
-# # Merge methylation calling PE+SE
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/{sample}_merged_cpg_filtered.txt.bgz",sample=SAMPLES)
-# )
-# 
-# # Unite methylation calling PE+SE
-# FINAL_FILES.extend(
-#    [DIR_methcall+"methylBase_per_chrom/methylBase_merged_cpg_dF.txt.bgz"]
-# )
+
+# # unite_meth_calls 
+FINAL_FILES.extend(
+    [DIR_methcall+"methylBase/methylBase_cpg_dF.RDS"]
+)
+
+
 # 
 # # Segmentation
 # ##FINAL_FILES.extend(
@@ -337,7 +319,7 @@ rule target:
 # # Methylation calling:
 # # 
 # # rules for PE and SE+PE
-# #include: "./Rules/Meth_preprocessing_rules.py"
+include: "./Rules/Meth_preprocessing_rules.py"
 #include: "./Rules/Meth_preprocessing_merged_rules.py"
 # 
 # 
