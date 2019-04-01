@@ -103,6 +103,34 @@ rule methCall_CpG:
                  --sample_id={params.sample_id} \
                  --logFile={log}
        """
+ 
+ 
+rule methylDacker_CpG:
+     input:
+         bamfile = DIR_deduped_picard+"{sample}/{sample}.dedup.sorted.bam"
+     output:
+         callFile = DIR_methcall+"{sample}/{sample}_methyldacker_Cpg.bedGraph"
+     params:
+         methylDacker_args = config['args']['methylDacker']
+     log:
+         DIR_methcall+"{sample}/{sample}.methyldacker_calls.log"
+     message: "Extract methylation calls from bam file using MethylDackel."
+     shell:
+       """
+       {tools}/MethylDackel extract {genomefile} {input.bamfile} -o {output} {params.methylDacker_args}
+       """ 
+       
+# # MethylDackel
+# inbam=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming/05_deduplication/WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7/WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7.dedup.sorted.bam
+# outfile=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming/05_deduplication/WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7/WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7.dedup.sorted.methyldacker.bedGraph
+# genome=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Base/Genomes/hg38/hg38_canonical/hg38.sel.fa
+# 
+# MethylDackel extract $genome $inbam -o $outfile --methylKit --keepSingleton  --keepDiscordant --keepDiscordant -@ 20 --chunkSize 1000000
+# #-d 10 -p 20
+# #--minDepth 10
+# MethylDackel mbias $genome $inbam mbias --keepSingleton  --keepDiscordant --keepDiscordant -@ 20
+
+
 
 # ==========================================================================================
 # Deduplication:

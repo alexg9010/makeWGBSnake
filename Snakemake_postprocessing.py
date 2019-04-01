@@ -34,7 +34,7 @@ except KeyError:
 
 ########################### TODO [START]
 SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
-SAMPLES = ["22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4"]
+#SAMPLES = ["22X3H1-RUNID-0144-FLOWCELL-AHF3YNCCXY-LANE-4"]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 #SAMPLES =["QMQHSB-RUNID-0195-FLOWCELL-BHFMKYCCXY-LANE-7"]
 ##########################  TODO [END]
@@ -62,7 +62,8 @@ NOTRIMMING = config['args']['notrimming']==True
 # Output directories
 
 WORKDIR = os.getcwd() + "/"                         
-DIR_scripts   = '/fast/users/kwreczy_m/projects/makeWGBSnake/Scripts/'
+#DIR_scripts   = '/fast/users/kwreczy_m/projects/makeWGBSnake/Scripts/'
+DIR_scripts   = '/home/kwreczy/projects/makeWGBSnake/Scripts/'
 
 DIR_plots = outputdir+'plots/'
 DIR_bigwig      = outputdir+'07_bigwig_files/'
@@ -207,19 +208,28 @@ FINAL_FILES = []
 
 
 # # Deduplicate
-FINAL_FILES.extend(
-  expand(DIR_deduped_picard+"{sample}/{sample}.dedup.bam",sample=SAMPLES)
-)
+# FINAL_FILES.extend(
+#   expand(DIR_deduped_picard+"{sample}/{sample}.dedup.bam",sample=SAMPLES)
+# )
 
 # # methylation calling
+# methylKit
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/{sample}_cpg_filtered.txt.bgz",sample=SAMPLES)
 # )
+# # methylDacker
+FINAL_FILES.extend(
+   expand(DIR_methcall+"{sample}/{sample}_methyldacker_Cpg.bedGraph",sample=SAMPLES)
+)
+
 
 # # unite_meth_calls 
-FINAL_FILES.extend(
-    [DIR_methcall+"methylBase/methylBase_cpg_dF.RDS"]
-)
+# FINAL_FILES.extend(
+#     [DIR_methcall+"methylBase/methylBase_cpg_dF.RDS"]
+# )
+# 
+
+
 
 
 # 
