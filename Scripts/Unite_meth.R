@@ -53,9 +53,8 @@ argsDF <- as.data.frame(do.call("rbind", parseArgs(args)))
 argsL <- as.list(as.character(argsDF$V2))
 
 names(argsL) <- argsDF$V1
-
-saveRDS(argsL, "~/argsL.RDS")#######################
-
+#saveRDS(argsL, "~/argsL.RDS")
+#argsL=readRDS("~/argsL.RDS")
 
 # ## catch output and messages into log file
 out <- file(argsL$logFile, open = "wt")
@@ -77,7 +76,7 @@ assembly = argsL$assembly
 save.db = argsL$savedb
 suffixT= argsL$suffixT
 suffixF= argsL$suffixF
-dbdir= argsL$adbdir
+dbdir= argsL$dbdir
 
 dir.create(dbdir)
 

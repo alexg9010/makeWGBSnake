@@ -74,13 +74,13 @@ if not SUBSET_READS and not NOTRIMMING:
      params:
         # bwa-meth parameters
          bwameth_args = config['args']['bwameth']
-     log:
-         DIR_mapped+"{sample}/{sample}_bwameth_pe_mapping.log"
+     #log:
+     #    DIR_mapped+"{sample}/{sample}_bwameth_pe_mapping.log"
      message: "Mapping paired-end reads to genome using bwa-meth."
      shell:
         """
         set -o pipefail
-        bwameth.py \\
+        {tools}/bwameth.py \\
         {params.bwameth_args} \\
         --reference {genomefile} \\
         {input.fin1} {input.fin2} | {tools}/samtools view -bS - > {output.bam}
@@ -108,7 +108,7 @@ if not SUBSET_READS and NOTRIMMING:
      shell:
         """
         set -o pipefail
-        bwameth.py \\
+        {tools}/bwameth.py \\
         {params.bwameth_args} \\
         --reference {genomefile} \\
         {input.fin1} {input.fin2} | {tools}/samtools view -bS - > {output.bam}

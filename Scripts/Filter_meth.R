@@ -53,8 +53,7 @@ argsDF <- as.data.frame(do.call("rbind", parseArgs(args)))
 argsL <- as.list(as.character(argsDF$V2))
 
 names(argsL) <- argsDF$V1
-
-saveRDS(argsL, "~/argsL.RDS")
+#saveRDS(argsL, "~/argsL.RDS") 
 
 ## catch output and messages into log file
 # out <- file(argsL$logFile, open = "wt")
@@ -97,7 +96,7 @@ df.chroms = read.table(chromcanonicalfile, sep="\t", stringsAsFactors = FALSE)
 df.chroms <- data.frame(chrom=df.chroms[,1], start=1, end=df.chroms[,2])
 gr.chroms <- as(df.chroms, "GRanges")
 
-# Tehre can be situation when there will be no canonical chromosomses in the methylRawDB.obj
+# There can be situation when there will be no canonical chromosomses in the methylRawDB.obj
 # and then selectByOverlap throws an error
 # such as 'Error: scanTabix: 'chr9' not present in tabix index'
 get.canon.chroms.methylRawDB.obj = function(methylRawDB.obj, gr.chroms, canonical_chromosomes, cores){
