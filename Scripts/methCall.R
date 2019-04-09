@@ -78,6 +78,7 @@ mincov    <- as.numeric(argsL$mincov)
 minqual   <- as.numeric(argsL$minqual)
 save_folder <- argsL$save_folder
 save_db <- argsL$save_db
+context   <- as.character(argsL$context)
 
 ### Extract Methylation Calls
 
@@ -87,7 +88,7 @@ methRawDB = processBismarkAln(location = input,
                             assembly = assembly,
                             mincov = mincov,
                             minqual = minqual,
-                            save.context = "CpG",
+                            save.context = context,
                             save.folder = save_folder,
                             save.db = TRUE
 )

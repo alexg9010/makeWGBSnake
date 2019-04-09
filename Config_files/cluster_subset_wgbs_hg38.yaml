@@ -7,8 +7,10 @@ chromsfile: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg
 chromcanonicalfile: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.canon.sizes"
 assembly: "hg38"
 args:
+  run_bismark: True
+  run_bwameth: False
   fastqc: ''
-  trim_galore: "  --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5   "
+  trim_galore: "  " # r: --clip_R1 10 --three_prime_clip_R1 5 --clip_R2 70 --three_prime_clip_R2 5 
   bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
   bismark_unmapped: "   "
   bwameth: "-t 12"
@@ -17,34 +19,20 @@ args:
   MINQUAL: "20"
   multiQC: ''
   bismark_genome_preparation: ''
-  sambamba_sort: " --memory-limit=3G --tmpdir=/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming//temp/ -t 10"
-  #sambamba_sort: " --memory-limit=30G --tmpdir=/fast/AG_Akalin/kwreczy/Projects/BIH_Neuroblastoma/Project/Results//subset_hg38/per_run_flowcell_lane/temp/ -t 1"
+  sambamba_sort: " --memory-limit=8G --tmpdir=/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming//temp/ -t 1"
   picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=35000 "
-  subset_reads: False
+  subset_reads: True
   notrimming: False
   methylDacker_methcalling: " --methylKit --keepSingleton  --keepDiscordant --keepDiscordant -@ 20 --chunkSize 1000000 "#-d 10 -p 20 "
   methylDacker_mbias: ""
-samples: ''
 treatment: ''
 treatment2: ''
+lanes_file: "/fast/users/kwreczy_m/work/projects/makeWGBSnake/InputFiles/Lanes.txt"
 
 # Here is info how I ran it: 
 #snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds
 # on cluster:
-#snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_vmem=8g -pe smp 16 -N '{rule}_{wildcards.sample}'"   
-
-#/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/subset_hg38/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_1_val_1.fq.gz
-
-#qsub -l h_rt=168:00:00 -V -b n -cwd -pe smp 4 -l h_vmem=40G ./temp
-
-#ref="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38_nohaplo.fa"
-#in1="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/subset_reads/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_1_val_1.fq.gz"
-#in2="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/subset_reads/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6_2_val_2.fq.gz"
-#myout="/fast_new/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane/04_mapping/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6/GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6.bam"
-#bwameth.py index $ref
-#bwameth.py --reference $ref $in1 $in2 -t 12 | samtools view -b - > $myout
-
-#qsub -V -b n -cwd -pe smp 4 -l h_vmem=40G ./temp_bwameth
+#snakemake -s ~/work/projects/makeWGBSnake_subset_hg38/Snakemake_postprocessing.py --keep-going -j 20  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_vmem=8g -pe smp 16 -N 'subset_{rule}_{wildcards.sample}'"   
 
 
 

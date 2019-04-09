@@ -88,8 +88,8 @@ methylRawDB.list.obj_filtered = mclapply(1:length(inputs), function(i)
                           dbtype='tabix'), 
                  mc.cores=cores)
 methylRawListDB.obj_filtered <- as(methylRawDB.list.obj_filtered, "methylRawListDB")
-
 methylRawListDB.obj_filtered@treatment = treatments
+
 
 ## Unite
 if( length(methylRawListDB.obj_filtered)>1 ){

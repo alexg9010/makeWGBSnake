@@ -3,86 +3,87 @@
 # ==========================================================================================
 # Deduplication:
 # 
-# rule merge_sort_index_dedup_perchr_pe_se:
-#      input:
-#          [DIR_deduped_picard+"{sample}/per_chrom/{sample}_"+chrom+"_merged.dedup.sorted.bam" for chrom in CHROMS_CANON]
-#      output:
-#          DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam"
-#      params:
-#          sort_args = config['args']['sambamba_sort'],
-#          tmpdir=DIR_deduped_picard+"{sample}/",
-#          unsorted_output=DIR_deduped_picard+"{sample}/{sample}_merged.dedup.bam"
-#      log:
-#          DIR_deduped_picard+"{sample}/{sample}_sort_merged.log"
-#      threads: 5
-#      benchmark:
-#           outputdir+"benchmarks/{sample}.merge_sort_index_dedup_perchr_pe_se.benchmark.txt"
-#      shell:
-#          """
-#          {tools}/sambamba merge -t {threads} {params.unsorted_output} {input}
-#          {tools}/sambamba sort {params.unsorted_output} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
-#          rm {params.unsorted_output}
-#          """
-# 
-# rule sort_index_dedup_perchr_pe_se:
-#      input:
-#          DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.bam"
-#      output:
-#          DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.sorted.bam"
-#      params:
-#          sort_args = config['args']['sambamba_sort'],
-#          tmpdir=DIR_deduped_picard+"{sample}/per_chrom/"
-#      benchmark:
-#           outputdir+"benchmarks/{sample}.sort_index_dedup_perchr_pe_se.benchmark.txt"
-#      shell:
-#          "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}"
-# 
-# rule dedup_picard_perchr_pe_se:
-#      input:
-#          DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam"
-#      output:
-#         outfile=temp(DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.dedup.bam"),
-#         metrics = DIR_deduped_picard+"{sample}/per_chrom/{sample}_{chrom}_merged.deduplication.metrics.txt"
-#      params:
-#          picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
-#      log:
-#          DIR_deduped_picard+"{sample}/per_chrom/{sample}_merged_deduplication.{chrom}.log"
-#      message:
-#           "Deduplicating paired-end aligned reads from {input}"
-#      benchmark:
-#           outputdir+"benchmarks/{sample}.dedup_picard_perchr_pe_se.benchmark.txt"
-#      shell:
-#           """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
-#           M={output.metrics} \
-#           REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
-#           > {log} \
-#           2> {log}.err"""
-# 
-# 
+
+
+rule sort_index_dedup_pe_se:
+     input:
+         DIR_deduped_picard+"{sample}/{sample}_merged.dedup.bam"
+     output:
+         DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam"
+     params:
+         sort_args = config['args']['sambamba_sort'],
+         tmpdir=DIR_deduped_picard+"{sample}/"
+     benchmark:
+          outputdir+"benchmarks/{sample}.sort_index_dedup_pe_se.benchmark.txt"
+     shell:
+         "{tools}/sambamba sort {input} --tmpdir={params.tmpdir} -o {output} {params.sort_args}"
+
+rule dedup_picard_pe_se:
+     input:
+         DIR_mapped_sample+"{sample}/{sample}_sorted.bam"
+     output:
+        outfile=temp(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.bam"),
+        metrics = DIR_deduped_picard+"{sample}/{sample}_merged.deduplication.metrics.txt"
+     params:
+         picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
+     log:
+         DIR_deduped_picard+"{sample}/{sample}_merged_deduplication.log"
+     message:
+          "Deduplicating paired-end aligned reads from {input}"
+     benchmark:
+          outputdir+"benchmarks/{sample}.dedup_picard_pe_se.benchmark.txt"
+     shell:
+          """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
+          M={output.metrics} \
+          REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
+          > {log} \
+          2> {log}.err"""
+
+
+# # ==========================================================================================
+# # Merge bam files from the same sample but different lanes
+#
+
+rule merge_lanes_idxstats:
+  input:
+    DIR_mapped_sample+"{sample}/{sample}_sorted.bam"
+  output:
+    DIR_mapped_sample+"{sample}/{sample}.idxstats.txt"
+  shell:
+    "samtools idxstats {input} > {output}"
+
+
+rule merge_lanes_stat:
+  input:
+    DIR_mapped_sample+"{sample}/{sample}_sorted.bam"
+  output:
+    DIR_mapped_sample+"{sample}/{sample}.stats.txt"
+  shell:
+    "samtools stats {input} > {output}"
+
+rule merge_lanes_flagstat:
+  input:
+    DIR_mapped_sample+"{sample}/{sample}_sorted.bam"
+  output:
+    DIR_mapped_sample+"{sample}/{sample}.flagstat.txt"
+  shell:
+    "samtools flagstat {input} > {output}"
+
+
+rule merge_lanes_bismark:
+     input:
+         config['lanes_file'],
+         infiles=lambda sample: [DIR_mapped+x+"/"+x+"_sorted_merged.bam" for x in SAMPLES_LANES[sample[0]] ]
+     output:
+         DIR_mapped_sample+"{sample}/{sample}_sorted.bam"
+     shell:
+         "{tools}/sambamba merge -t 5 {output} {input.infiles}"
+
+
+
 # # ==========================================================================================
 # # Merge SE ad PE:
 # 
-# 
-# rule split_merged_pe_se:
-#   input:
-#     DIR_mapped+"{sample}/{sample}_sorted_merged.bam"
-#   output:
-#     temp(DIR_mapped+"{sample}/{sample}_{chrom}_merged_sorted.bam")
-#   params:
-#     chrom="{chrom}",
-#     outslice = DIR_mapped+"{sample}/{sample}_{chrom}_merged.bam",
-#     sort_args = config['args']['sambamba_sort'],
-#     tmpdir=DIR_mapped+"{sample}/"
-#   log:
-#     DIR_mapped+"{sample}/{sample}_merged_sort.log"
-#   benchmark:
-#     outputdir+"benchmarks/{sample}.split_merged_pe_se.benchmark.txt"
-#   shell:
-#     """
-#     {tools}/sambamba slice --output-filename={params.outslice} {input} {params.chrom}
-#     {tools}/sambamba sort {params.outslice} --tmpdir={params.tmpdir} -o {output} {params.sort_args}  > {log} 2> {log}.err
-#     """   
-
 
 rule idxstats_bismark_merged:
   input:
@@ -134,7 +135,6 @@ rule merge_bam_pe_and_se:
 # Map unaliagned reads:
 
 ## PBAT for R2
-
 # ### Paired-end
 # rule sort_index_bam_unmapped2_se_pbat:
 #   input:
