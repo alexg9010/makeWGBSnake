@@ -50,32 +50,81 @@ def filter_and_canon_in_func(w):
          return(DIR_methcall+w.sample+"/tabix_CHG/"+w.sample+"_chg.txt.bgz")
      if w.context=="CHH":
          return(DIR_methcall+w.sample+"/tabix_CHH/"+w.sample+"_chh.txt.bgz")
-
-# def filter_and_canon_out_func(w):
-#      if w.context=="CpG":
-#          return(DIR_methcall+"{sample}/tabix_{context}/"+w.sample+"_{context}_filtered.txt.bgz)
-#      if w.context=="CHG":
-#          return(DIR_methcall+"{sample}/tabix_{context}/"+w.sample+"_{context}_filtered.txt.bgz)
-#      if w.context=="CHH":
-#          return(DIR_methcall+"{sample}/tabix_{context}/"+w.sample+"_{context}_filtered.txt.bgz)
-
-
-
-rule filter_and_canon:
+         
+rule filter_and_canon_chh:
      input:
-         tabixfile     =  filter_and_canon_in_func#DIR_methcall+"{sample}/tabix_{context}/{sample}_{contextlowercase}.txt.bgz"
+         tabixfile     =  DIR_methcall+"{sample}/tabix_CHH/{sample}_chh.txt.bgz"
      output:
-         outputfile    = DIR_methcall+"{sample}/tabix_{context}/{sample}_cpg_filtered.txt.bgz"
+         outputfile    = DIR_methcall+"{sample}/tabix_CHH/{sample}_CHH_filtered.txt.bgz"
      params:
          mincov      = MINCOV,
-         save_folder = DIR_methcall+"{sample}/tabix_{context}/",
-         sample_id = "{sample}_{context}",
+         save_folder = DIR_methcall+"{sample}/tabix_CHH/",
+         sample_id = "{sample}_CHH",
          canon_chrs_file = chromcanonicalfile,
          assembly    = ASSEMBLY,
          hi_perc=99.9,
          cores=10
      log:
-         DIR_methcall+"{sample}/{sample}.{context}.meth_calls_filter.log"
+         DIR_methcall+"{sample}/{sample}.CHH.meth_calls_filter.log"
+     message: ""
+     shell:
+       """
+         {tools}/Rscript {DIR_scripts}/Filter_meth.R \
+                 --tabixfile={input.tabixfile} \
+                 --mincov={params.mincov} \
+                 --hi_perc={params.hi_perc} \
+                 --save_folder={params.save_folder} \
+                 --sample_id={params.sample_id} \
+                 --assembly={params.assembly} \
+                 --cores={params.cores} \
+                 --canon_chrs_file={params.canon_chrs_file} \
+                 --logFile={log}
+         """
+         
+rule filter_and_canon_chg:
+     input:
+         tabixfile     =  DIR_methcall+"{sample}/tabix_CHG/{sample}_chg.txt.bgz"
+     output:
+         outputfile    = DIR_methcall+"{sample}/tabix_CHG/{sample}_CHG_filtered.txt.bgz"
+     params:
+         mincov      = MINCOV,
+         save_folder = DIR_methcall+"{sample}/tabix_CHG/",
+         sample_id = "{sample}_CHG",
+         canon_chrs_file = chromcanonicalfile,
+         assembly    = ASSEMBLY,
+         hi_perc=99.9,
+         cores=10
+     log:
+         DIR_methcall+"{sample}/{sample}.CHG.meth_calls_filter.log"
+     message: ""
+     shell:
+       """
+         {tools}/Rscript {DIR_scripts}/Filter_meth.R \
+                 --tabixfile={input.tabixfile} \
+                 --mincov={params.mincov} \
+                 --hi_perc={params.hi_perc} \
+                 --save_folder={params.save_folder} \
+                 --sample_id={params.sample_id} \
+                 --assembly={params.assembly} \
+                 --cores={params.cores} \
+                 --canon_chrs_file={params.canon_chrs_file} \
+                 --logFile={log}
+         """
+rule filter_and_canon_cpg:
+     input:
+         tabixfile     =  DIR_methcall+"{sample}/tabix_CpG/{sample}_cpg.txt.bgz"
+     output:
+         outputfile    = DIR_methcall+"{sample}/tabix_CpG/{sample}_CpG_filtered.txt.bgz"
+     params:
+         mincov      = MINCOV,
+         save_folder = DIR_methcall+"{sample}/tabix_CpG/",
+         sample_id = "{sample}_CpG",
+         canon_chrs_file = chromcanonicalfile,
+         assembly    = ASSEMBLY,
+         hi_perc=99.9,
+         cores=10
+     log:
+         DIR_methcall+"{sample}/{sample}.CpG.meth_calls_filter.log"
      message: ""
      shell:
        """

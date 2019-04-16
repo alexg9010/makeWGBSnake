@@ -32,7 +32,7 @@ lanes_file: "/fast/users/kwreczy_m/work/projects/makeWGBSnake/InputFiles/Lanes.t
 # Here is info how I ran it: 
 #snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds
 # on cluster:
-#snakemake -s ~/work/projects/makeWGBSnake_subset_hg38/Snakemake_postprocessing.py --keep-going -j 20  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_vmem=8g -pe smp 16 -N 'subset_{rule}_{wildcards.sample}'"   
+#snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile ~/work/projects/makeWGBSnake/Config_files/cluster_subset_wgbs_hg38.yaml --printshellcmds --cluster "qsub -V -cwd -b y  -l h_vmem=8g -pe smp 16 -N 'subset_{rule}_{wildcards.sample}'"   
 
 
 

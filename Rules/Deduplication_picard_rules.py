@@ -28,8 +28,11 @@ rule dedup_picard_bwameth:
      message:
           "Deduplicating paired-end aligned reads from {input}"
      shell:
-          """{tools}/picard MarkDuplicates I={input} O={output.outfile} \
+          #"""{tools}/picard MarkDuplicates I={input} O={output.outfile} \
+          """{tools}/java -Xmx10g -jar {tools}/../share/picard-2.19.0-0/picard.jar MarkDuplicates I={input} O={output.outfile} \
           M={output.metrics} \
           REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
           > {log} \
           2> {log}.err"""
+
+

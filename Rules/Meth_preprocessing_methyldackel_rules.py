@@ -75,7 +75,7 @@ rule filter_and_chromcanon_meth_calls:
          sample_id = "{sample}_methyldacker_cpg",
          canon_chrs_file = chromcanonicalfile,
          assembly    = ASSEMBLY,
-         hi_perc=99.9,
+         hi_perc=99,
          cores=10
      log:
          DIR_methcall+"{sample}/{sample}.meth_calls_filter.log"

@@ -33,13 +33,13 @@ except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
 ########################### TODO [START]
-#SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
+SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
 #SAMPLES = ["L3RXU9-RUNID-0157-FLOWCELL-AHFJKHCCXY-LANE-2"]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 # WYKWK3
-SAMPLES =  ["WYKWK3-RUNID-0187-FLOWCELL-AHFCW5CCXY-LANE-8",
-           "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7",
-           "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-8"]
+# SAMPLES =  ["WYKWK3-RUNID-0187-FLOWCELL-AHFCW5CCXY-LANE-8",
+#            "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7",
+#            "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-8"]
 ##########################  TODO [END]
 
 try:
@@ -78,8 +78,8 @@ DIR_scripts   = '/fast/users/kwreczy_m/work/projects/makeWGBSnake/Scripts/'
 if ARGS["run_bwameth"] and not ARGS["run_bismark"]:
   DIR_methcall    = outputdir+'06_methyl_calls_bwameth/'
   DIR_deduped_picard     = outputdir+'05_deduplication_bwameth/'
-  DIR_mapped      = outputdir+'04_mapping_bwameth/'    ############
-  #DIR_mapped      = outputdir+'04_mapping_bwameth_nohardtrimming/'    ############
+  #DIR_mapped      = outputdir+'04_mapping_bwameth/'    ############
+  DIR_mapped      = outputdir+'04_mapping_bwameth_nohardtrimming/'    ############
   DIR_mapped_sample      = outputdir+'04_mapping_bwameth_sample/'
   
 if ARGS["run_bismark"] and not ARGS["run_bwameth"]:
@@ -91,13 +91,13 @@ if ARGS["run_bismark"] and not ARGS["run_bwameth"]:
 
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 #DIR_trimmed     = outputdir+'02_trimming/' 
-#DIR_trimmed     = outputdir+'02_trimming_nohardtrimming/' ############
+DIR_trimmed     = outputdir+'02_trimming_nohardtrimming/' ############
 DIR_rawqc       = outputdir+'01_raw_QC/'
 
 
 if SUBSET_READS:
   DIR_trimmed_subset=outputdir+'subset_reads/'
-DIR_trimmed     = DIR_trimmed_subset#outputdir+'02_trimming_nohardtrimming/' ##################################
+#DIR_trimmed     = DIR_trimmed_subset#outputdir+'02_trimming_nohardtrimming/' ##################################
 
 
 
@@ -254,8 +254,8 @@ def read_treatment(file_path):
     treatment_dict [ row[1] ] = row[2] # treatment value is a character 
   return treatment_dict
   
-
 SAMPLES_LANES = read_lanes_file(config['lanes_file'])
+
 from itertools import chain
 SAMPLES_LANES_copy = SAMPLES_LANES
 SAMPLES_LANES = {}
@@ -266,21 +266,19 @@ for key, value in SAMPLES_LANES_copy.items():
 
 SAMPLES_TREATMENT = read_treatment(config['lanes_file'])
 
-
-
 # FINAL_FILES.extend(
-#    expand(DIR_mapped_sample+"{sample}/{sample}.bwameth_sorted.bam",sample=SAMPLES_LANES.keys())
+#    expand(DIR_mapped_sample+"{sample}/{sample}_sorted.bam",sample=SAMPLES_LANES.keys())
 # )
 # 
-# FINAL_FILES.extend(
-#     expand(DIR_mapped_sample+"{sample}/{sample}.bwameth.flagstat.txt",sample=SAMPLES_LANES.keys())
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped_sample+"{sample}/{sample}.bwameth.stats.txt",sample=SAMPLES_LANES.keys())
-# )
-# FINAL_FILES.extend(
-#     expand(DIR_mapped_sample+"{sample}/{sample}.bwameth.idxstats.txt",sample=SAMPLES_LANES.keys())
-# )
+FINAL_FILES.extend(
+    expand(DIR_mapped_sample+"{sample}/{sample}.flagstat.txt",sample=SAMPLES_LANES.keys())
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped_sample+"{sample}/{sample}.stats.txt",sample=SAMPLES_LANES.keys())
+)
+FINAL_FILES.extend(
+    expand(DIR_mapped_sample+"{sample}/{sample}.idxstats.txt",sample=SAMPLES_LANES.keys())
+)
 # # 
 
 # ==========================================================================================
@@ -293,18 +291,18 @@ SAMPLES_TREATMENT = read_treatment(config['lanes_file'])
 # )
 # # Methylation calling
 ## methylDacker
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/{sample}_methyldacker_CpG.methylKit",sample=SAMPLES_LANES.keys()) ##########
-# )
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
-# )
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/tabix_CHG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
-# )
-# FINAL_FILES.extend(
-#    expand(DIR_methcall+"{sample}/tabix_CHH/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
-# )
+FINAL_FILES.extend(
+   expand(DIR_methcall+"{sample}/{sample}_methyldacker_CpG.methylKit",sample=SAMPLES_LANES.keys()) ##########
+)
+FINAL_FILES.extend(
+   expand(DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
+)
+FINAL_FILES.extend(
+   expand(DIR_methcall+"{sample}/tabix_CHG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
+)
+FINAL_FILES.extend(
+   expand(DIR_methcall+"{sample}/tabix_CHH/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
+)
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/tabix_CpG/{sample}_methyldacker_cpg_filtered.txt.bgz",sample=SAMPLES_LANES.keys())
 # )
@@ -315,17 +313,16 @@ SAMPLES_TREATMENT = read_treatment(config['lanes_file'])
 
 
 # Deduplicate
-FINAL_FILES.extend(
-  expand(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam",sample=SAMPLES_LANES.keys())
-)
+# FINAL_FILES.extend(
+#   expand(DIR_deduped_picard+"{sample}/{sample}_merged.dedup.sorted.bam",sample=SAMPLES_LANES.keys())
+# )
 # # Methylation calling
 ## methylKit
-FINAL_FILES.extend(
-   expand(DIR_methcall+"{sample}/tabix_{context}/{sample}_{contextlowercase}_filtered.txt.bgz",
-          sample=SAMPLES_LANES.keys(), 
-          context=['CpG'],
-          contextlowercase=['cpg'])#,'CHG','CHH']) ##############################################
-)
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/tabix_{context}/{sample}_{context}_filtered.txt.bgz",
+#           sample=SAMPLES_LANES.keys(),
+#           context=['CpG', 'CHG','CHH'])
+# )
 #print(FINAL_FILES)
 
 # # unite_meth_calls

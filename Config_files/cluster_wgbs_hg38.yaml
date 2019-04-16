@@ -20,7 +20,7 @@ args:
   multiQC: ''
   bismark_genome_preparation: ''
   sambamba_sort: " --memory-limit=25G --tmpdir=/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane//temp/ -t 1"
-  picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=35000 "
+  picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=15000 "
   subset_reads: False
   notrimming: False
   methylDacker_methcalling: " --methylKit --keepSingleton  --keepDiscordant --keepDiscordant -@ 20 --chunkSize 1000000 "#-d 10 -p 20 "
@@ -37,5 +37,30 @@ lanes_file: "/fast/users/kwreczy_m/work/projects/makeWGBSnake/InputFiles/Lanes.t
 # snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'bm_{rule}_{wildcards.sample}'" 
 #snakemake --rerun-incomplete  -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'bm_{rule}_{wildcards.sample}'" 
 
+# Note:
+# it might be that for markdeduplciates I should use -Xmx8g param for java
+# http://seqanswers.com/forums/showthread.php?t=11609
+# Deduplication
+#https://www.biostars.org/p/267754/ Question: Samtools rmdup and Piccard Markduplicates
+#A similar discussion could be found here
+#According to Picard FAQs, samtools rmdup do not remove interchromosomal duplicates while picard MarkDuplicates does!
+#<!-- [Tue Apr 16 00:47:35 CEST 2019] picard.sam.markduplicates.MarkDuplicates done. Elapsed time: 202.90 minutes. -->
+#<!-- Runtime.totalMemory()=1042808832 -->
+#<!-- To get help, see http://broadinstitute.github.io/picard/index.html#GettingHelp -->
+#<!-- Exception in thread "main" java.lang.OutOfMemoryError: GC overhead limit exceeded -->
+#<!--         at htsjdk.samtools.BinaryCigarCodec.binaryCigarToCigarElement(BinaryCigarCodec.java:87) -->
+#<!--         at htsjdk.samtools.BinaryCigarCodec.decode(BinaryCigarCodec.java:63) -->
+#<!--         at htsjdk.samtools.BAMRecord.getCigar(BAMRecord.java:275) -->
+#<!--         at htsjdk.samtools.SAMRecord.isValid(SAMRecord.java:2092) -->
+#<!--         at htsjdk.samtools.BAMFileReader$BAMFileIterator.advance(BAMFileReader.java:848) -->
+#<!--         at htsjdk.samtools.BAMFileReader$BAMFileIterator.next(BAMFileReader.java:834) -->
+#<!--         at htsjdk.samtools.BAMFileReader$BAMFileIterator.next(BAMFileReader.java:802) -->
+#<!--         at htsjdk.samtools.SamReader$AssertingIterator.next(SamReader.java:574) -->
+#<!--         at htsjdk.samtools.SamReader$AssertingIterator.next(SamReader.java:553) -->
+#<!--         at picard.sam.markduplicates.MarkDuplicates.buildSortedReadEndLists(MarkDuplicates.java:550) -->
+#<!--         at picard.sam.markduplicates.MarkDuplicates.doWork(MarkDuplicates.java:264) -->
+#<!--         at picard.cmdline.CommandLineProgram.instanceMain(CommandLineProgram.java:295) -->
+#<!--         at picard.cmdline.PicardCommandLine.instanceMain(PicardCommandLine.java:103) -->
+#<!--         at picard.cmdline.PicardCommandLine.main(PicardCommandLine.java:113) -->
 
 
