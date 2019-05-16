@@ -38,8 +38,8 @@ SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 # WYKWK3
 # SAMPLES =  ["WYKWK3-RUNID-0187-FLOWCELL-AHFCW5CCXY-LANE-8",
-#            "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7",
-#            "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-8"]
+#             "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-7",
+#             "WYKWK3-RUNID-0188-FLOWCELL-BHF5H3CCXY-LANE-8"]
 ##########################  TODO [END]
 
 try:
@@ -81,6 +81,7 @@ if ARGS["run_bwameth"] and not ARGS["run_bismark"]:
   #DIR_mapped      = outputdir+'04_mapping_bwameth/'    ############
   DIR_mapped      = outputdir+'04_mapping_bwameth_nohardtrimming/'    ############
   DIR_mapped_sample      = outputdir+'04_mapping_bwameth_sample/'
+  DIR_bigwig = outputdir + outputdir+'07_bigwig_files_bwameth/'
   
 if ARGS["run_bismark"] and not ARGS["run_bwameth"]:
   DIR_methcall    = outputdir+'06_methyl_calls_bismark/'
@@ -291,18 +292,18 @@ FINAL_FILES.extend(
 # )
 # # Methylation calling
 ## methylDacker
-FINAL_FILES.extend(
-   expand(DIR_methcall+"{sample}/{sample}_methyldacker_CpG.methylKit",sample=SAMPLES_LANES.keys()) ##########
-)
-FINAL_FILES.extend(
-   expand(DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
-)
-FINAL_FILES.extend(
-   expand(DIR_methcall+"{sample}/tabix_CHG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
-)
-FINAL_FILES.extend(
-   expand(DIR_methcall+"{sample}/tabix_CHH/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
-)
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/{sample}_methyldacker_CpG.methylKit",sample=SAMPLES_LANES.keys()) ##########
+# )
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
+# )
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/tabix_CHG/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
+# )
+# FINAL_FILES.extend(
+#    expand(DIR_methcall+"{sample}/tabix_CHH/{sample}.txt.bgz",sample=SAMPLES_LANES.keys())
+# )
 # FINAL_FILES.extend(
 #    expand(DIR_methcall+"{sample}/tabix_CpG/{sample}_methyldacker_cpg_filtered.txt.bgz",sample=SAMPLES_LANES.keys())
 # )
@@ -330,6 +331,11 @@ FINAL_FILES.extend(
 #     [DIR_methcall+"methylBase/methylBase_cpg_dF.RDS"]
 # )
 
+# BigWig files
+FINAL_FILES.extend(
+    expand(DIR_bigwig+"{sample}/{sample}.bw", sample=SAMPLES_LANES.keys())
+)
+
 
 # This part won't work most likely:
 # 
@@ -351,18 +357,9 @@ FINAL_FILES.extend(
 # FINAL_FILES.extend(
 #     expand(DIR_diffmeth+'diffmeth_{treat}.RDS', treat=TREATMENT_UNIQUE)
 # )
-# # BigWig files
-# FINAL_FILES.extend(
-#     expand(DIR_bigwig+"{sample}/{sample}.bw", sample=SAMPLES)
-# )
-# ## # BigWig files
-# ## FINAL_FILES.extend(
-# ##     expand(DIR_bigwig+"{sample}/per_chrom/{sample}_{chrom}.bw", sample=SAMPLES, chrom=CHROMS_CANON)
-# ## )
-# # BigWig files
-# FINAL_FILES.extend(
-#     expand(DIR_bigwig+"{sample}/{sample}_merged.bw", sample=SAMPLES)
-# )
+
+
+
 
 rule target:
   input: FINAL_FILES
@@ -414,8 +411,8 @@ rule target:
 # # ==========================================================================================
 # # Export a bigwig file:
 # #
-# # rules for PE and SE+PE
-#include: "./Rules/Export_BW.py"
+# rules for PE and SE+PE
+include: "./Rules/Export_BW.py"
 # 
 #        
 # # ==========================================================================================
