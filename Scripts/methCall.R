@@ -60,8 +60,6 @@ out <- file(argsL$logFile, open = "wt")
 sink(out,type = "output")
 sink(out, type = "message")
 
-saveRDS(argsL, "~/argsL.RDS")
-
 
 # Run Functions -----------------------------------------------------------
 

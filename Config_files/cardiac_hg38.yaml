@@ -1,0 +1,57 @@
+---
+input: "/fast/users/kwreczy_m/scratch/cardiac/C101HW18100469/raw_data/"
+input_all: "/fast/users/kwreczy_m/scratch/cardiac/C101HW18100469/raw_data/all/"
+output: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/"
+genome: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38_nohaplo.fa"
+tools: "/fast/users/kwreczy_m/work/conda-prefix/envs/bsseqpipe/bin/"
+chromsfile: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.sizes"
+chromcanonicalfile: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.canon.sizes"
+assembly: "hg38"
+args:
+  run_bismark: False
+  run_bwameth: True
+  fastqc: ''
+  trim_galore: " --clip_R2 19 "
+  bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
+  bismark_unmapped: "   "
+  bwameth: "-t 12"
+  MAPQ: "10"
+  MINCOV: "1"
+  MINQUAL: "5"
+  MINCOV_FILTER: "3"
+  HIPERC_FILTER: "100"
+  multiQC: ''
+  bismark_genome_preparation: ''
+  sambamba_sort: " --memory-limit=25G --tmpdir=/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane//temp/ -t 1"
+  picard_MarkDuplicates_args: " MAX_RECORDS_IN_RAM=15000 "
+  subset_reads: False
+  notrimming: False
+  methylDacker_methcalling: " --minDepth 1 -q 5 -p 5 --methylKit --keepSingleton  --keepDiscordant --keepDiscordant -@ 20 --chunkSize 1000000 "#-d 10 -p 20 "
+  methylDacker_mbias: ""
+treatment: ''
+treatment2: ''
+lanes_file: "/fast/users/kwreczy_m/work/projects/makeWGBSnake/InputFiles/Lanes.txt"
+
+
+# Here is info how I ran it:
+# snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds
+# snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
+# snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'longnohardtrimming_{rule}_{wildcards.sample}'" 
+# snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=10g -l h_rt=168:00:00 -pe smp 18 -N 'c_{rule}_{wildcards.sample}'" 
+
+# Note:
+# it might be that for markdeduplciates I should use -Xmx8g param for java
+# http://seqanswers.com/forums/showthread.php?t=11609
+#Finished job 156.
+#183 of 193 steps (95%) done
+#Exiting because a job execution failed. Look above for error message
+#Complete log: /fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane/.snakemake/log/2019-04-16T122435.439143.snakemake.log
+#memory.limit(size=4026531840)  # shoudl it be added to my R scripts??????
+
+# _MAPQ_40.bam
+# ..MAPQ_40.bam
+# _40.bam
+# _40_sorted.bam
+# _40_sorted.bam.bai
+
+

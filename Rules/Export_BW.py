@@ -3,10 +3,10 @@
 # Export a bigwig file:
 
 
-rule export_bigwig_bwamethmethyldacker:
+rule export_bigwig:
     input:
         seqlengths = chromcanonicalfile,
-        tabixfile    = DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz"
+        tabixfile    = DIR_methcall+"{sample}/tabix_CpG/{sample}_CpG_filtered.txt.bgz"
     params:
         sampleid = "{sample}"
     output:
