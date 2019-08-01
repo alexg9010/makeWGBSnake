@@ -27,13 +27,14 @@ chromcanonicalfile = config["chromcanonicalfile"]
 tools = config['tools']
 ARGS = config['args']
 
+
 try:
     SAMPLES = config["samples"]
 except KeyError:
     SAMPLES = [re.sub('\\_1.fq.gz$', '', os.path.basename(x)) for x in glob.glob(inputdir+"*_1.fq.gz")]
 
 ########################### TODO [START]
-SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
+#SAMPLES = [os.path.basename(x)[:-8] for x in glob.glob(inputdir+"*_1.fq.gz")]
 #SAMPLES = ["L3RXU9-RUNID-0157-FLOWCELL-AHFJKHCCXY-LANE-2"]
 #SAMPLES = ["GW3LEP-RUNID-0143-FLOWCELL-BHFCTMCCXY-LANE-6"]
 # WYKWK3
@@ -88,7 +89,13 @@ if ARGS["run_bismark"] and not ARGS["run_bwameth"]:
   DIR_deduped_picard     = outputdir+'05_deduplication_bismark/' 
   DIR_mapped      = outputdir+'04_mapping_bismark_nohardtrimming/'    
   DIR_mapped_sample      = outputdir+'04_mapping_bismark_sample/'
-  
+
+if ARGS["run_bsmap"] and not ARGS["run_bwameth"] and not ARGS["run_bismark"]:
+  #DIR_methcall    = outputdir+'06_methyl_calls_bsmap/'
+  #DIR_deduped_picard     = outputdir+'05_deduplication_bsmap/' 
+  DIR_mapped      = outputdir+'04_mapping_bsmap/'    
+  DIR_mapped_sample      = outputdir+'04_mapping_bsmap_sample/'
+    
 
 DIR_posttrim_QC = outputdir+'03_posttrimming_QC/'
 #DIR_trimmed     = outputdir+'02_trimming/' 
@@ -439,6 +446,8 @@ if ARGS["run_bismark"]:
   include: "./Rules/Align_bismark_rules.py"
 if ARGS["run_bwameth"]:
   include: "./Rules/Align_bwameth_rules.py"
+if ARGS["run_bsmap"]:
+  include: "./Rules/Align_bsmap_rules.py"
 
            
 # ==========================================================================================

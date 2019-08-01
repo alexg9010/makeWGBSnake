@@ -1,6 +1,6 @@
 ---
 input: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw/Renamed/"
-output: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane/"
+output: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/"
 genome: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38_nohaplo.fa"
 tools: "/fast/users/kwreczy_m/work/conda-prefix/envs/bsseqpipe/bin/"
 chromsfile: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38.chrom.sizes"
@@ -8,15 +8,14 @@ chromcanonicalfile: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Ge
 assembly: "hg38"
 args:
   run_bismark: False
-  run_bwameth: False
-  run_bsmap: True
+  run_bwameth: True
   fastqc: ''
   trim_galore: "  "
   bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
   bismark_unmapped: "   "
   bwameth: "-t 12"
   methCall: ''
-  MINCOV: "10"
+  MINCOV: "1"
   MINQUAL: "20"
   multiQC: ''
   bismark_genome_preparation: ''
@@ -32,10 +31,10 @@ lanes_file: "/fast/users/kwreczy_m/work/projects/makeWGBSnake/InputFiles/Lanes.t
 
 
 # Here is info how I ran it:
-# snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds
-# snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
-# snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'longnohardtrimming_{rule}_{wildcards.sample}'" 
-# snakemake -n -s ~/work/projects/makeWGBSnake_hg38_perlane/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cluster_wgbs_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'bm_{rule}_{wildcards.sample}'" 
+# snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 20  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds
+# snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N '{rule}_{wildcards.sample}'" 
+# snakemake -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'longnohardtrimming_{rule}_{wildcards.sample}'" 
+# snakemake -n -s ~/work/projects/makeWGBSnake_hg38_perlane/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=25g -l h_rt=168:00:00 -pe smp 7 -N 'bm_{rule}_{wildcards.sample}'" 
 
 # Note:
 # it might be that for markdeduplciates I should use -Xmx8g param for java
