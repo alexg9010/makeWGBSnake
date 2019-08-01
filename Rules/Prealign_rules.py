@@ -24,8 +24,8 @@ rule fastqc_after_trimming_pe:
 
 rule trim_reads_pe:
      input:
-         files = [ inputdir+"{sample}_1.fq.gz",
-                   inputdir+"{sample}_2.fq.gz"]
+         files = [ inputdirall+"{sample}_1.fq.gz", ###########
+                   inputdirall+"{sample}_2.fq.gz"]############
      output:
          DIR_trimmed+"{sample}/{sample}_1_val_1.fq.gz",
          DIR_trimmed+"{sample}/{sample}_2_val_2.fq.gz",
@@ -48,7 +48,7 @@ rule trim_reads_pe:
 
 rule fastqc_raw_pe:
     input:
-       inputdir+"{sample}_{ext}.fq.gz"
+       inputdirall+"{sample}_{ext}.fq.gz"
     output:
         DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.html",
         DIR_rawqc+"{sample}/{sample}_{ext}_fastqc.zip"

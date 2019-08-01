@@ -31,7 +31,7 @@ myMethylBaseDB <- methylKit:::readMethylBaseDB(dbpath = input,
                                     resolution = "base",
                                     treatment = treatments,
                                     destranded = FALSE)
-
+meth.deT=
 
 # change treatment vector
 myMethylBaseDB@treatment  = ifelse(myMethylBaseDB@treatment==t,  1, 0)

@@ -57,7 +57,7 @@ rule filter_and_canon_chh:
      output:
          outputfile    = DIR_methcall+"{sample}/tabix_CHH/{sample}_CHH_filtered.txt.bgz"
      params:
-         mincov      = MINCOV,
+         mincov      = MINCOV_FILTER,
          save_folder = DIR_methcall+"{sample}/tabix_CHH/",
          sample_id = "{sample}_CHH",
          canon_chrs_file = chromcanonicalfile,
@@ -87,7 +87,7 @@ rule filter_and_canon_chg:
      output:
          outputfile    = DIR_methcall+"{sample}/tabix_CHG/{sample}_CHG_filtered.txt.bgz"
      params:
-         mincov      = MINCOV,
+         mincov      = MINCOV_FILTER,
          save_folder = DIR_methcall+"{sample}/tabix_CHG/",
          sample_id = "{sample}_CHG",
          canon_chrs_file = chromcanonicalfile,
@@ -116,7 +116,7 @@ rule filter_and_canon_cpg:
      output:
          outputfile    = DIR_methcall+"{sample}/tabix_CpG/{sample}_CpG_filtered.txt.bgz"
      params:
-         mincov      = MINCOV,
+         mincov      = MINCOV_FILTER,
          save_folder = DIR_methcall+"{sample}/tabix_CpG/",
          sample_id = "{sample}_CpG",
          canon_chrs_file = chromcanonicalfile,

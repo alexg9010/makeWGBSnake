@@ -1,81 +1,56 @@
 
-rule unite_meth_calls:
-     input:
-         [DIR_methcall+sample+"/tabix_CpG/"+sample+"_methyldacker_cpg_filtered.txt.bgz" for sample in SAMPLES_LANES.keys()]
-     output:
-         destrandTfileT = DIR_methcall+"methylBase/methylBase_cpg_dT.RDS",
-         destrandFfileF = DIR_methcall+"methylBase/methylBase_cpg_dF.RDS",
-         destrandTfile_tbxT = DIR_methcall+"methylBase/methylBase_cpg_dT.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
-         destrandFfile_tbxF = DIR_methcall+"methylBase/methylBase_cpg_dF.txt.bgz"
-     params:
-         inputdir = DIR_methcall,
-         samples = " ".join(SAMPLES_LANES.keys()),
-         treatments = [SAMPLES_TREATMENT[sample] for sample in SAMPLES_LANES.keys()],
-         assembly=ASSEMBLY,
-         cores=24,
-         savedb=True,
-         dbdir = DIR_methcall+"methylBase/",
-         suffixT = "_cpg_dT",
-         suffixF = "_cpg_dF",
-     log: DIR_methcall+"methylBase/meth_unite_cpg.log"
-     shell:
-       """
-         {tools}/Rscript {DIR_scripts}/Unite_meth.R \
-                 --inputfiles="{input}" \
-                 --destrandTfile={output.destrandTfileT} \
-                 --destrandFfile={output.destrandFfileF} \
-                 --inputdir={params.inputdir} \
-                 --samples="{params.samples}" \
-                 --treatments="{params.treatments}" \
-                 --assembly="{params.assembly}" \
-                 --cores={params.cores} \
-                 --savedb={params.savedb} \
-                 --logFile={log} \
-                 --dbdir={params.dbdir} \
-                 --suffixT={params.suffixT} \
-                 --suffixF={params.suffixF}
-         """
-# "H9H1KG"
-# > methylRawListDB.obj_filtered[[18]]
-# methylRawDB object with 1 rows
-# --------------
-#   chr    start      end strand coverage numCs numTs
-# 1 chr3 93470645 93470645      +       12     1    11
+# print(SAMPLES_TREATMENT.keys())
+# #print(SAMPLES_LANES.keys())
 
-# in1="/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming/06_methyl_calls/H9H1KG/tabix/H9H1KG_methyldacker_cpg_filtered.txt.bgz"
-# in1="/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/subset_hg38/per_run_flowcell_lane_notrimming/06_methyl_calls/H9H1KG/tabix/H9H1KG.txt.bgz"
-# 
-# tmp = methRead(in1, 
-#          "a" , 
-#          "a", 
-#          dbtype='tabix')
-# 
-# filterByCoverage(tmp,
-#                  lo.count=10,
-#                  lo.perc=NULL,
-#                  hi.count=NULL,
-#                  hi.perc=NULL,
-#                  #dbdir=save_folder,
-#                  dbtype="tabix"#,
-#                  #save.db = TRUE
-#                  )
-
-
-
-         
+# rule unite_meth_calls:
+#      input:
+#          [DIR_methcall+sample+"/tabix_CpG/"+sample+"_CpG_filtered.txt.bgz" for sample in [x for x in SAMPLES_TREATMENT.keys()]]
+#      output:
+#          destrandTfileT = DIR_methcall+"methylBase/methylBase_CpG_dT.RDS",
+#          destrandFfileF = DIR_methcall+"methylBase/methylBase_CpG_dF.RDS",
+#          destrandTfile_tbxT = DIR_methcall+"methylBase/methylBase_CpG_dT.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
+#          destrandFfile_tbxF = DIR_methcall+"methylBase/methylBase_CpG_dF.txt.bgz"
+#      params:
+#          inputdir = DIR_methcall,
+#          samples = " ".join(SAMPLES_LANES.keys()),
+#          treatments = [SAMPLES_TREATMENT[sample] for sample in SAMPLES_LANES.keys()],
+#          assembly=ASSEMBLY,
+#          cores=24,
+#          savedb=True,
+#          dbdir = DIR_methcall+"methylBase/",
+#          suffixT = "CpG_dT",
+#          suffixF = "CpG_dF",
+#      log: DIR_methcall+"methylBase/meth_unite_CpG.log"
+#      shell:
+#        """
+#          {tools}/Rscript {DIR_scripts}/Unite_meth.R \
+#                  --inputfiles="{input}" \
+#                  --destrandTfile={output.destrandTfileT} \
+#                  --destrandFfile={output.destrandFfileF} \
+#                  --inputdir={params.inputdir} \
+#                  --samples="{params.samples}" \
+#                  --treatments="{params.treatments}" \
+#                  --assembly="{params.assembly}" \
+#                  --cores={params.cores} \
+#                  --savedb={params.savedb} \
+#                  --logFile={log} \
+#                  --dbdir={params.dbdir} \
+#                  --suffixT={params.suffixT} \
+#                  --suffixF={params.suffixF}
+#          """
 
 rule filter_and_chromcanon_meth_calls:
      input:
          tabixfile     =  DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz"
      output:
-         outputfile    = DIR_methcall+"{sample}/tabix_CpG/{sample}_methyldacker_cpg_filtered.txt.bgz"
+         outputfile    = DIR_methcall+"{sample}/tabix_CpG/{sample}_CpG_filtered.txt.bgz"
      params:
-         mincov      = MINCOV,
+         mincov      = MINCOV_FILTER,
          save_folder = DIR_methcall+"{sample}"+"/tabix_CpG/",
-         sample_id = "{sample}_methyldacker_cpg",
+         sample_id = "{sample}_CpG",
          canon_chrs_file = chromcanonicalfile,
          assembly    = ASSEMBLY,
-         hi_perc=99,
+         hi_perc=99.9,
          cores=10
      log:
          DIR_methcall+"{sample}/{sample}.meth_calls_filter.log"
@@ -104,14 +79,16 @@ rule tabix_methylDackerfile_CpG:
          sampleid="{sample}",
          assembly=ASSEMBLY,
          treatment=lambda sampleid: SAMPLES_TREATMENT[sampleid[0]],
-         subdir="/tabix_CpG/"
+         subdir="/tabix_CpG/",
+         mincov=config['args']['MINCOV']
      log:
          DIR_methcall+"{sample}/tabix_CpG/{sample}.txt.bgz.log"
      shell: # code below is an act of frustration of snakemake and R.
          """
-         echo "require(methylKit); myobjDB=methRead('{input}',sample.id='{params.sampleid}',assembly='{params.assembly}',treatment='{params.treatment}',context='CpG',dbtype = 'tabix',dbdir = paste0('{DIR_methcall}','{params.sampleid}','{params.subdir}'))" | {tools}/R --vanilla > {log} 2> {log}.err
+         echo "require(methylKit); myobjDB=methRead('{input}',mincov=as.numeric('{params.mincov}'), sample.id='{params.sampleid}',assembly='{params.assembly}',treatment='{params.treatment}',context='CpG',dbtype = 'tabix',dbdir = paste0('{DIR_methcall}','{params.sampleid}','{params.subdir}'))" | {tools}/R --vanilla > {log} 2> {log}.err
          """
          
+
 rule tabix_methylDackerfile_CHG:
      input:
          DIR_methcall+"{sample}/{sample}_methyldacker_CHG.methylKit"
@@ -122,14 +99,17 @@ rule tabix_methylDackerfile_CHG:
          sampleid="{sample}",
          assembly=ASSEMBLY,
          treatment=lambda sampleid: SAMPLES_TREATMENT[sampleid[0]],
-         subdir="/tabix_CHG/"
+         subdir="/tabix_CHG/",
+         mincov=config['args']['MINCOV']
+
      log:
          DIR_methcall+"{sample}/tabix_CHG/{sample}.txt.bgz.log"
      shell: # code below is an act of frustration of snakemake and R.
          """
-         echo "require(methylKit); myobjDB=methRead('{input}',sample.id='{params.sampleid}',assembly='{params.assembly}',treatment='{params.treatment}',context='CHG',dbtype = 'tabix',dbdir = paste0('{DIR_methcall}','{params.sampleid}','{params.subdir}'))" | {tools}/R --vanilla > {log} 2> {log}.err
+         echo "require(methylKit); myobjDB=methRead('{input}',mincov=as.numeric('{params.mincov}'),sample.id='{params.sampleid}',assembly='{params.assembly}',treatment='{params.treatment}',context='CHG',dbtype = 'tabix',dbdir = paste0('{DIR_methcall}','{params.sampleid}','{params.subdir}'))" | {tools}/R --vanilla > {log} 2> {log}.err
          """
-         
+
+
 rule tabix_methylDackerfile_CHH:
      input:
          DIR_methcall+"{sample}/{sample}_methyldacker_CHH.methylKit"
@@ -140,12 +120,13 @@ rule tabix_methylDackerfile_CHH:
          sampleid="{sample}",
          assembly=ASSEMBLY,
          treatment=lambda sampleid: SAMPLES_TREATMENT[sampleid[0]],
-         subdir="/tabix_CHH/"
+         subdir="/tabix_CHH/",
+         mincov=config['args']['MINCOV']
      log:
-         DIR_methcall+"{sample}/tabix_CHH//{sample}.txt.bgz.log"
+         DIR_methcall+"{sample}/tabix_CHH/{sample}.txt.bgz.log"
      shell: # code below is an act of frustration of snakemake and R.
          """
-         echo "require(methylKit); myobjDB=methRead('{input}',sample.id='{params.sampleid}',assembly='{params.assembly}',treatment='{params.treatment}',context='CHH',dbtype = 'tabix',dbdir = paste0('{DIR_methcall}','{params.sampleid}','{params.subdir}'))" | {tools}/R --vanilla > {log} 2> {log}.err
+         echo "require(methylKit); myobjDB=methRead('{input}',mincov=as.numeric('{params.mincov}'),sample.id='{params.sampleid}',assembly='{params.assembly}',treatment='{params.treatment}',context='CHH',dbtype = 'tabix',dbdir = paste0('{DIR_methcall}','{params.sampleid}','{params.subdir}'))" | {tools}/R --vanilla > {log} 2> {log}.err
          """
 
 
@@ -183,7 +164,6 @@ rule methylDacker_CHH:
        """
        {tools}/MethylDackel extract --CHH {genomefile} {input.bamfile} -o {params.out} {params.methylDacker_args}
        """ 
-
 
 rule methylDacker_CHG:
      input:

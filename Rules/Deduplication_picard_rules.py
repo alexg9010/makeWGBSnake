@@ -22,14 +22,15 @@ rule dedup_picard_bwameth:
         outfile=DIR_deduped_picard+"{sample}/{sample}.dedup.bam",
         metrics = DIR_deduped_picard+"{sample}/{sample}.deduplication.metrics.txt"
      params:
-         picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args']
+         picard_MarkDuplicates_args = config['args']['picard_MarkDuplicates_args'],
+         avail_mem = '10g'
      log:
          DIR_deduped_picard+"{sample}/{sample}.deduplication.log"
      message:
           "Deduplicating paired-end aligned reads from {input}"
      shell:
-          #"""{tools}/picard MarkDuplicates I={input} O={output.outfile} \
-          """{tools}/java -Xmx10g -jar {tools}/../share/picard-2.19.0-0/picard.jar MarkDuplicates I={input} O={output.outfile} \
+          #"""{tools}/picard MarkDuplicates I={input} O={output.outfile} \ ######################TODO
+          """{tools}/java -Xmx{params.avail_mem} -jar {tools}/../share/picard-2.19.0-0/picard.jar MarkDuplicates I={input} O={output.outfile} \
           M={output.metrics} \
           REMOVE_DUPLICATES=true AS=true {params.picard_MarkDuplicates_args} \
           > {log} \

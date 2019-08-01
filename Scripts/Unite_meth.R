@@ -53,7 +53,7 @@ argsDF <- as.data.frame(do.call("rbind", parseArgs(args)))
 argsL <- as.list(as.character(argsDF$V2))
 
 names(argsL) <- argsDF$V1
-#saveRDS(argsL, "~/argsL.RDS")
+# saveRDS(argsL, "~/argsL.RDS") ##############################################################
 #argsL=readRDS("~/argsL.RDS")
 
 # ## catch output and messages into log file
@@ -78,7 +78,36 @@ suffixT= argsL$suffixT
 suffixF= argsL$suffixF
 dbdir= argsL$dbdir
 
-dir.create(dbdir)
+# dir.create(dbdir)
+# destrandTfile='/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/06_methyl_calls_bwameth/methylBase/methylBase_CpG_dT.RDS'
+# destrandFfile='/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/06_methyl_calls_bwameth/methylBase/methylBase_CpG_dF.RDS'
+# inputdir='/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/06_methyl_calls_bwameth/'
+# dbdir="~/scratch/"
+
+# SAMPLES = 
+# c(
+#  'AC10',
+#  'AC2',
+#  'AC3',
+#  'AC4',
+#  'AC5',
+#  'AC6',
+#  'AC7',
+#  'AC8',
+#  'AC9',
+#  'N1',
+#  'N2',
+#  'N3',
+#  'N4',
+#  'N5',
+#  'N6'
+# )
+
+DIR_methcall="/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/06_methyl_calls_bwameth/"
+
+inputs= sapply(SAMPLES, function(sample) paste0(DIR_methcall,sample,"/tabix_CpG/",sample,"_CpG_filtered.txt.bgz"))
+
+library(methylKit)
 
 ## Read data
 methylRawDB.list.obj_filtered = mclapply(1:length(inputs), function(i)
@@ -88,7 +117,12 @@ methylRawDB.list.obj_filtered = mclapply(1:length(inputs), function(i)
                           dbtype='tabix'), 
                  mc.cores=cores)
 methylRawListDB.obj_filtered <- as(methylRawDB.list.obj_filtered, "methylRawListDB")
-methylRawListDB.obj_filtered@treatment = treatments
+#methylRawListDB.obj_filtered@treatment = treatments
+methylRawListDB.obj_filtered@treatment = 1:length(treatments)
+
+
+# check if sorted
+
 
 
 ## Unite
@@ -99,6 +133,15 @@ if( length(methylRawListDB.obj_filtered)>1 ){
                  save.db = save.db,
                  suffix = suffixT,
                  dbdir=dbdir)
+
+# Error in value[[3L]](cond) :
+#   internal: samtools invoked 'exit(1)'; see warnings() and restart R
+#   file: /fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/cardiac/06_methyl_calls_bwameth/AC10/tabix_CpG/AC10_CpG_filtered_destrand.txt.bgz
+# In addition: Warning message:
+# In doTryCatch(return(expr), name, parentenv, handler) :
+#   [ti_index_core] the file out of order at line 1518394
+
+
   # its faster to save methylBaseDB object into RDS and then to read it
   # than save it again as a list of tabix files.
   saveRDS(meth.deT, destrandTfile)
@@ -174,5 +217,7 @@ if( length(methylRawListDB.obj_filtered)>1 ){
   meth.deFDB = my.make.tabix(meth.deF, dbdir, suffixF)
   
 }
+
+
 
 
