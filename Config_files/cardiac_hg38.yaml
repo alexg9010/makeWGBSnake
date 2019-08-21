@@ -10,6 +10,7 @@ assembly: "hg38"
 args:
   run_bismark: False
   run_bwameth: True
+  run_bsmap: False
   fastqc: ''
   trim_galore: " --clip_R2 19 "
   bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "

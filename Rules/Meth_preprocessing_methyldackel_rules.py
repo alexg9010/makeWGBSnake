@@ -1,40 +1,40 @@
 
-# rule unite_meth_calls:
-#      input:
-#          [DIR_methcall+sample+"/tabix_CpG/"+sample+"_CpG_filtered.txt.bgz" for sample in [x for x in SAMPLES_TREATMENT.keys()]]
-#      output:
-#          destrandTfileT = DIR_methcall+"methylBase/methylBase_CpG_dT.RDS",
-#          destrandFfileF = DIR_methcall+"methylBase/methylBase_CpG_dF.RDS",
-#          destrandTfile_tbxT = DIR_methcall+"methylBase/methylBase_CpG_dT.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
-#          destrandFfile_tbxF = DIR_methcall+"methylBase/methylBase_CpG_dF.txt.bgz"
-#      params:
-#          inputdir = DIR_methcall,
-#          samples = " ".join(SAMPLES_LANES.keys()),
-#          treatments = [SAMPLES_TREATMENT[sample] for sample in SAMPLES_LANES.keys()],
-#          assembly=ASSEMBLY,
-#          cores=24,
-#          savedb=True,
-#          dbdir = DIR_methcall+"methylBase/",
-#          suffixT = "CpG_dT",
-#          suffixF = "CpG_dF",
-#      log: DIR_methcall+"methylBase/meth_unite_CpG.log"
-#      shell:
-#        """
-#          {tools}/Rscript {DIR_scripts}/Unite_meth.R \
-#                  --inputfiles="{input}" \
-#                  --destrandTfile={output.destrandTfileT} \
-#                  --destrandFfile={output.destrandFfileF} \
-#                  --inputdir={params.inputdir} \
-#                  --samples="{params.samples}" \
-#                  --treatments="{params.treatments}" \
-#                  --assembly="{params.assembly}" \
-#                  --cores={params.cores} \
-#                  --savedb={params.savedb} \
-#                  --logFile={log} \
-#                  --dbdir={params.dbdir} \
-#                  --suffixT={params.suffixT} \
-#                  --suffixF={params.suffixF}
-#          """
+rule unite_meth_calls:
+     input:
+         [DIR_methcall+sample+"/tabix_CpG/"+sample+"_CpG_filtered.txt.bgz" for sample in [x for x in SAMPLES_TREATMENT.keys()]]
+     output:
+         destrandTfileT = DIR_methcall+"methylBase/methylBase_CpG_dT.RDS",
+         destrandFfileF = DIR_methcall+"methylBase/methylBase_CpG_dF.RDS",
+         destrandTfile_tbxT = DIR_methcall+"methylBase/methylBase_CpG_dT.txt.bgz", # snakemake pretends that this file doesnt exist and removes it
+         destrandFfile_tbxF = DIR_methcall+"methylBase/methylBase_CpG_dF.txt.bgz"
+     params:
+         inputdir = DIR_methcall,
+         samples = " ".join(SAMPLES_LANES.keys()),
+         treatments = [SAMPLES_TREATMENT[sample] for sample in SAMPLES_LANES.keys()],
+         assembly=ASSEMBLY,
+         cores=24,
+         savedb=True,
+         dbdir = DIR_methcall+"methylBase/",
+         suffixT = "CpG_dT",
+         suffixF = "CpG_dF",
+     log: DIR_methcall+"methylBase/meth_unite_CpG.log"
+     shell:
+       """
+         {tools}/Rscript {DIR_scripts}/Unite_meth.R \
+                 --inputfiles="{input}" \
+                 --destrandTfile={output.destrandTfileT} \
+                 --destrandFfile={output.destrandFfileF} \
+                 --inputdir={params.inputdir} \
+                 --samples="{params.samples}" \
+                 --treatments="{params.treatments}" \
+                 --assembly="{params.assembly}" \
+                 --cores={params.cores} \
+                 --savedb={params.savedb} \
+                 --logFile={log} \
+                 --dbdir={params.dbdir} \
+                 --suffixT={params.suffixT} \
+                 --suffixF={params.suffixF}
+         """
 
 rule filter_and_chromcanon_meth_calls:
      input:

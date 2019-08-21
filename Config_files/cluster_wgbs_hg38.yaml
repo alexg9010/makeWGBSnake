@@ -1,6 +1,6 @@
 ---
-input: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw/Renamed/"
-input_all: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw/Renamed/"
+input: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw/Renamed/tmp/"
+input_all: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Data/Raw/Renamed/tmp/"
 output: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Project/Results/hg38_perlane/"
 genome: "/fast/work/projects/peifer_wgs/work/2017-12-19_WGBS/Base/Genomes/hg38/nohaplo/hg38_nohaplo.fa"
 tools: "/fast/users/kwreczy_m/work/conda-prefix/envs/bsseqpipe/bin/"
@@ -12,8 +12,8 @@ email: "katarzyna.wreczycka@mdc-berlin.de"
 # Arguments
 args:
   run_bismark: False
-  run_bwameth: False
-  run_bsmap: True
+  run_bwameth: True
+  run_bsmap: False
   fastqc: ''
   trim_galore: "  "
   bismark: "  --ambig_bam  --unmapped --ambiguous --parallel 2  -N 0 -L  15  --score_min L,0,-0.6  --maxins 1000 --chunkmbs 100 "
