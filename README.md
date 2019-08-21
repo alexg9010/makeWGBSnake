@@ -6,6 +6,7 @@ This is a private repository that contains a pipeline for WGBS data analysis.
 - It can subset reads using `bbmap` (optional)
 - Generate Reference Genome Index (optional)
 - Align Reads using either `bismark`, `bwa-meth` or `bsmap`
+- Merge lanes
 - Deduplicate Alignments using `Picard MarkDuplicate`
 - Extract methylation calls using either `methylKit` or `methyldacker`
 - filter methylation calles and unite common CpGs over all samples using `methylKit`
