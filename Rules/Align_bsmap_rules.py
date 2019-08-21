@@ -34,10 +34,10 @@
 #     "samtools flagstat {input} > {output}"
     
     
-# rule merge_lanes_bwameth:
+# rule merge_lanes_bsmap:
 #      input:
 #          config['lanes_file'],
-#          infiles=lambda sample: [DIR_mapped+x+"/"+x+".bwameth_sorted.bam" for x in SAMPLES_LANES[sample[0]] ]
+#          infiles=lambda sample: [DIR_mapped+x+"/"+x+".bsmap_sorted.bam" for x in SAMPLES_LANES[sample[0]] ]
 #      output:
 #          DIR_mapped_sample+"{sample}/{sample}_sorted.bam"
 #      shell:
@@ -48,7 +48,7 @@
 # # Align. stats
 #  
 
-rule idxstats_bwameth:
+rule idxstats:
   input:
     DIR_mapped+"{sample}/{sample}.bsmap_sorted.bam"
   output:
@@ -57,7 +57,7 @@ rule idxstats_bwameth:
     "samtools idxstats {input} > {output}"
 
 
-rule stat_bwameth:
+rule stat:
   input:
     DIR_mapped+"{sample}/{sample}.bsmap_sorted.bam"
   output:
@@ -66,7 +66,7 @@ rule stat_bwameth:
     "samtools stats {input} > {output}"
 
 
-rule flagstat_bwameth:
+rule flagstat:
   input:
     DIR_mapped+"{sample}/{sample}.bsmap_sorted.bam"
   output:
@@ -75,7 +75,7 @@ rule flagstat_bwameth:
     "samtools flagstat {input} > {output}"
 
 
-rule sort_index_bam_bwameth:
+rule sort_index_bam:
   input:
     DIR_mapped+"{sample}/{sample}.bsmap.bam"
   output:
@@ -108,15 +108,10 @@ rule bsmap_align_pe:
     message: "Mapping paired-end reads to genome using BSMAP."
     shell:
       """
-       set -o pipefail
-       {tools}/bsmap \\
-       -d  {input.genomefile} \\
-       -a {input.fin1} -b {input.fin2} \\
-       -o {output.bam} \\
-       -2 out_upair.bsp -p 8 -v 5 -l 8
+      {tools}/bsmap  -d  {input.genomefile}  -a {input.fin1} -b {input.fin2} -o {output.bam} -p 8 -v 5  > {log} 2> {log}.err
       """
-        
-   
+# This argument didn't want to work for me        
+#-2 {output.bam_unpair}  
 
 
 

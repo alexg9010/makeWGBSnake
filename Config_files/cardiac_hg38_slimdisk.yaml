@@ -34,6 +34,6 @@ lanes_file: "/fast/users/kwreczy_m/work/projects/makeWGBSnake/InputFiles/Lanes.t
 
 
 # Here is info how I ran it:
-# snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38_slimdisk.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=10g -l h_rt=168:00:00 -pe smp 18 -N 'c_{rule}_{wildcards.sample}'" 
+# snakemake -n -s ~/work/projects/makeWGBSnake/Snakemake.py --keep-going -j 40  --configfile /fast/users/kwreczy_m/work/projects/makeWGBSnake/Config_files/cardiac_hg38_slimdisk.yaml --printshellcmds    --cluster "qsub -V -cwd -b y -P medium -l h_vmem=10g -l h_rt=168:00:00 -pe smp 18 -N 'c_{rule}_{wildcards.sample}'" 
 
 

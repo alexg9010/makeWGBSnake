@@ -3,8 +3,6 @@
 # Methylation calling:
 # 
 
-####################################################################### METHYLKIT [START] ################################ 
-# 
 rule unite_meth_calls_cpg:
      input:
          [DIR_methcall+sample+"/tabix_CpG/"+sample+"_cpg_filtered.txt.bgz" for sample in SAMPLES_LANES.keys()]
@@ -229,12 +227,5 @@ rule methCall_CpG:
                  --sample_id={params.sample_id} \
                  --logFile={log}
        """
-####################################################################### METHYLKIT [END] ################################ 
-
-
-
-
-
-
 
 

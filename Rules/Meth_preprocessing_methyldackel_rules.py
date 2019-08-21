@@ -1,7 +1,4 @@
 
-# print(SAMPLES_TREATMENT.keys())
-# #print(SAMPLES_LANES.keys())
-
 # rule unite_meth_calls:
 #      input:
 #          [DIR_methcall+sample+"/tabix_CpG/"+sample+"_CpG_filtered.txt.bgz" for sample in [x for x in SAMPLES_TREATMENT.keys()]]

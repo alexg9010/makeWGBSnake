@@ -96,7 +96,4 @@ treatment2:
 - 'LR'
 
 # Here is how I ran it:
-#  snakemake -s ~/projects/makeWGBSnake/Snakemake_postprocessing.py --keep-going -j 50  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg19.yaml --printshellcmds  --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N 'hg19.{rule}_{wildcards.sample}'" 
-
-# , '5', '4', '3', '5', '2', '4', '1', '4', '1', '1', '4', '2', '5', '5', '4', '1', '2', '5', '3', '1', '2', '3', '2'
-# 'Sampled_236L96', 'Sampled_2P3UF1', 'Sampled_5QCV6R', 'Sampled_9J2DTT', 'Sampled_A45S2Q', 'Sampled_AA49P6', 'Sampled_BZZHHV', 'Sampled_EXP2C8', 'Sampled_FTMVW6', 'Sampled_GW3LEP', 'Sampled_H9H1KG', 'Sampled_KJ678J', 'Sampled_L1PP31', 'Sampled_L3RXU9', 'Sampled_LJ8KVQ', 'Sampled_MCCDLU', 'Sampled_MTSNQV', 'Sampled_QMQHSB', 'Sampled_W2MXGZ', 'Sampled_WYKWK3', 'Sampled_YYGAV6', 'Sampled_Z75FFC', 'Sampled_ZTFVN7'
+#  snakemake -s ~/projects/makeWGBSnake/Snakemake.py --keep-going -j 50  --configfile /fast/users/kwreczy_m/projects/makeWGBSnake/Config_files/cluster_wgbs_hg19.yaml --printshellcmds  --cluster "qsub -V -cwd -b y -P medium -l h_vmem=30g -l h_rt=168:00:00 -pe smp 6 -N 'hg19.{rule}_{wildcards.sample}'" 
