@@ -15,4 +15,3 @@ This is a private repository that contains a pipeline for WGBS data analysis.
 ## Example visualisation of the DAG of jobs
 Example dag for a pipeline that uses bwa-meth+methyldacker:
 ![DAG](dags/dag_21_08_2019_bwameth.svg)
-<img src="dags/dag_21_08_2019_bwameth.svg">
