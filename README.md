@@ -8,7 +8,7 @@ This is a private repository that contains a pipeline for WGBS data analysis.
 - Align Reads using either `bismark`, `bwa-meth` or `bsmap`
 - Merge lanes
 - Deduplicate Alignments using `Picard MarkDuplicate`
-- Extract methylation calls using either `methylKit` or `methyldacker`
+- Extract methylation calls using either `methylKit` or `methyldacker` (CpG, CHH and/or CHG contexts)
 - filter methylation calles and unite common CpGs over all samples using `methylKit`
 - Create BigWig files
 - Segmentation of methylation signal using `methylKit`
